@@ -59,7 +59,7 @@ function TeslaAccessory(log, config) {
   //
   // }.bind(this));
 
-  this.setLockState(Characteristic.LockTargetState.SECURED, function() {});
+  //this.setLockState(Characteristic.LockTargetState.SECURED, function() {});
 }
 
 // Get the ID of the vehicle in your account with the desired VIN.
