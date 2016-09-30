@@ -1,4 +1,4 @@
-var teslams = require('teslams');
+var tesla = require('teslams');
 var util = require('util');
 var Service, Characteristic;
 
@@ -27,45 +27,27 @@ function TeslaAccessory(log, config) {
     .on('get', this.getLockState.bind(this))
     .on('set', this.setLockState.bind(this));
 
-  // teslams.get_vid({email:this.username,password:this.password}, function(vid) {
-  //
-  //   this.log('Got Tesla VID: ' + vid);
-  //   this.vid = vid;
-  //
-  //   teslams.get_climate_state(vid, function(result) {
-  //
-  //     /* State is something like:
-  //
-  //      { inside_temp: null,
-  //        outside_temp: null,
-  //        driver_temp_setting: 22.6,
-  //        passenger_temp_setting: 22.6,
-  //        is_auto_conditioning_on: null,
-  //        is_front_defroster_on: null,
-  //        is_rear_defroster_on: false,
-  //        fan_status: null,
-  //        seat_heater_left: 0,
-  //        seat_heater_right: 0,
-  //        seat_heater_rear_left: 0,
-  //        seat_heater_rear_right: 0,
-  //        seat_heater_rear_center: 0,
-  //        seat_heater_rear_right_back: 0,
-  //        seat_heater_rear_left_back: 0,
-  //        smart_preconditioning: false }
-  //     */
-  //
-  //     this.log(util.inspect(result));
-  //   }.bind(this));
-  //
-  // }.bind(this));
+  this.climateService = new Service.Switch(this.name);
 
-  //this.setLockState(Characteristic.LockTargetState.SECURED, function() {});
+  this.climateService
+    .getCharacteristic(Characteristic.On)
+    .on('get', this.getClimateOn.bind(this))
+    .on('set', this.setClimateOn.bind(this));
 }
+
+TeslaAccessory.prototype.getServices = function() {
+  return [this.lockService, this.climateService];
+}
+
+//
+// Get Vehicles and ID
+//
 
 // Get the ID of the vehicle in your account with the desired VIN.
 TeslaAccessory.prototype.getID = function(callback) {
+  this.log("Logging into Tesla...");
 
-  teslams.all({email:this.username,password:this.password}, function(err, response, body) {
+  tesla.all({email:this.username,password:this.password}, function(err, response, body) {
 
     /* Body is something like:
     {
@@ -126,12 +108,14 @@ TeslaAccessory.prototype.getID = function(callback) {
 TeslaAccessory.prototype.getLockState = function(callback) {
   this.log("Getting current state...");
 
-  teslams.get_vid({email:this.username,password:this.password}, function(vid) {
+  this.getID(function(err, id) {
 
-    this.log('Got Tesla VID: ' + vid);
-    this.vid = vid;
+    if (err) {
+      callback(err);
+      return;
+    }
 
-    teslams.get_vehicle_state(vid, function(state) {
+    tesla.get_vehicle_state(id, function(state) {
 
       /* State is something like:
 
@@ -186,6 +170,8 @@ TeslaAccessory.prototype.setLockState = function(state, callback) {
 
   var locked = (state == Characteristic.LockTargetState.SECURED);
 
+  this.log("Setting car to locked = " + locked);
+
   this.getID(function(err, id) {
 
     if (err) {
@@ -193,9 +179,7 @@ TeslaAccessory.prototype.setLockState = function(state, callback) {
       return;
     }
 
-    this.log("Setting car to locked = " + locked);
-
-    teslams.door_lock({id: id, lock: locked}, function(response) {
+    tesla.door_lock({id: id, lock: locked}, function(response) {
 
       if (response.result == true) {
         this.log("Car is now locked = " + locked);
@@ -224,6 +208,75 @@ TeslaAccessory.prototype.setLockState = function(state, callback) {
   }.bind(this));
 },
 
-TeslaAccessory.prototype.getServices = function() {
-  return [this.lockService];
+//
+// Climate Control
+//
+
+TeslaAccessory.prototype.getClimateOn = function(callback) {
+  this.log("Getting current state...");
+
+  this.getID(function(err, id) {
+
+    if (err) {
+      callback(err);
+      return;
+    }
+
+    tesla.get_climate_state(id, function(state) {
+
+      /* State is something like:
+
+       { inside_temp: null,
+         outside_temp: null,
+         driver_temp_setting: 22.6,
+         passenger_temp_setting: 22.6,
+         is_auto_conditioning_on: null,
+         is_front_defroster_on: null,
+         is_rear_defroster_on: false,
+         fan_status: null,
+         seat_heater_left: 0,
+         seat_heater_right: 0,
+         seat_heater_rear_left: 0,
+         seat_heater_rear_right: 0,
+         seat_heater_rear_center: 0,
+         seat_heater_rear_right_back: 0,
+         seat_heater_rear_left_back: 0,
+         smart_preconditioning: false }
+      */
+
+      callback(null, state.is_auto_conditioning_on);
+
+    }.bind(this));
+
+  }.bind(this));
+}
+
+TeslaAccessory.prototype.setClimateOn = function(on, callback) {
+
+  this.log("Setting climate to on = " + on);
+
+  this.getID(function(err, id) {
+
+    if (err) {
+      callback(err);
+      return;
+    }
+
+    var climateState = on ? 'start' : 'stop';
+
+    tesla.auto_conditioning({id:id, climate: climateState}, function(response) {
+
+      if (response.result == true) {
+        this.log("Car climate control is now on = " + on);
+
+        callback(null); // success
+      }
+      else {
+        this.log("Error setting climate state: " + util.inspect(arguments));
+        callback(err || new Error("Error setting climate state."));
+      }
+
+    }.bind(this));
+
+  }.bind(this));
 }
