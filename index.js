@@ -59,7 +59,7 @@ function TeslaAccessory(log, config) {
   //
   // }.bind(this));
 
-  this.setLockState(Characteristic.LockTargetState.SECURED);
+  this.setLockState(Characteristic.LockTargetState.SECURED, function() {});
 }
 
 // Get the ID of the vehicle in your account with the desired VIN.
@@ -119,6 +119,10 @@ TeslaAccessory.prototype.getID = function(callback) {
   }.bind(this));
 }
 
+//
+// Door locking/unlocking
+//
+
 TeslaAccessory.prototype.getLockState = function(callback) {
   this.log("Getting current state...");
 
@@ -129,8 +133,50 @@ TeslaAccessory.prototype.getLockState = function(callback) {
 
     teslams.get_vehicle_state(vid, function(state) {
 
+      /* State is something like:
+
+      { api_version: 3,
+        autopark_state: 'unavailable',
+        autopark_state_v2: 'ready',
+        autopark_style: 'dead_man',
+        calendar_supported: true,
+        car_type: 'x',
+        car_version: '2.36.31',
+        center_display_state: 0,
+        dark_rims: false,
+        df: 0,
+        dr: 0,
+        exterior_color: 'Pearl',
+        ft: 0,
+        has_spoiler: true,
+        homelink_nearby: false,
+        last_autopark_error: 'no_error',
+        locked: true,
+        notifications_supported: true,
+        odometer: 6152.574762,
+        parsed_calendar_supported: true,
+        perf_config: 'P1',
+        pf: 0,
+        pr: 0,
+        rear_seat_heaters: 3,
+        remote_start: false,
+        remote_start_supported: true,
+        rhd: false,
+        roof_color: 'None',
+        rt: 0,
+        seat_type: 0,
+        spoiler_type: 'Passive',
+        sun_roof_installed: 0,
+        sun_roof_percent_open: null,
+        sun_roof_state: 'unknown',
+        third_row_seats: 'FuturisFoldFlat',
+        valet_mode: false,
+        vehicle_name: 'Best Car Ever',
+        wheel_type: 'AeroTurbine20' }
+      */
 
       callback(null, state.locked);
+
     }.bind(this));
 
   }.bind(this));
@@ -150,7 +196,7 @@ TeslaAccessory.prototype.setLockState = function(state, callback) {
     this.log("Setting car to locked = " + locked);
 
     teslams.door_lock({id: id, lock: locked}, function(response) {
-      console.log("CALLBACK");
+
       if (response.result == true) {
         this.log("Car is now locked = " + locked);
 
@@ -158,8 +204,13 @@ TeslaAccessory.prototype.setLockState = function(state, callback) {
         var currentState = (state == Characteristic.LockTargetState.SECURED) ?
           Characteristic.LockCurrentState.SECURED : Characteristic.LockCurrentState.UNSECURED;
 
-        this.service
-          .setCharacteristic(Characteristic.LockCurrentState, currentState);
+        // We need to update the current state "later" because Siri can't
+        // handle receiving the change event inside the same "set target state"
+        // response.
+        setTimeout(function() {
+          this.lockService
+            .setCharacteristic(Characteristic.LockCurrentState, currentState);
+        }.bind(this), 1);
 
         callback(null); // success
       }
