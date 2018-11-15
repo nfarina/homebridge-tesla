@@ -1,6 +1,6 @@
 // @flow
 
-const tesla = require('TeslaJS');
+const tesla = require('teslajs');
 
 //tesla.setLogLevel(tesla.API_LOG_ALL);
 
