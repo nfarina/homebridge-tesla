@@ -70,7 +70,6 @@ class TeslaAccessory {
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see if climate is on because that could drain battery!
     const state: VehicleState = await api('vehicleState', options);
-    console.log(state);
 
     return state.locked ?
       Characteristic.LockCurrentState.SECURED :
