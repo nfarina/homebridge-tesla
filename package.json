@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tesla",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Tesla support for Homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -17,7 +17,27 @@
     "node": ">=0.12.0",
     "homebridge": ">=0.2.0"
   },
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
-    "teslams": "github:hjespers/teslams#9ca38c5cd033689e55897f80e2cd506ec6bb91ac"
+    "@babel/polyfill": "^7.0.0",
+    "teslajs": "^2.1.45"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.1.6",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/preset-env": "^7.1.6",
+    "@babel/preset-flow": "^7.0.0",
+    "flow-bin": "^0.86.0",
+    "rollup": "^0.67.1",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-node-resolve": "^3.4.0"
+  },
+  "scripts": {
+    "dev": "rollup -c -w",
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
   }
 }

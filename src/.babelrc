@@ -1,0 +1,14 @@
+{
+  "presets": [
+    ["@babel/env", {
+      "targets": {
+        "node": "4.3.2"
+      },
+      "modules": false
+    }],
+    "@babel/flow"
+  ],
+  "plugins": [
+    "@babel/proposal-class-properties"
+  ]
+}
