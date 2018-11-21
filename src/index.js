@@ -5,9 +5,11 @@ require('@babel/polyfill');
 import type { ClimateState, Vehicle, VehicleState } from './util/types';
 import {wait} from './util/wait';
 import api from './util/api';
+import {lock} from './util/mutex';
 import callbackify from './util/callbackify';
 
 const util = require('util');
+const tesla = require('teslajs');
 
 let Service, Characteristic;
 
@@ -22,6 +24,7 @@ class TeslaAccessory {
   // From config.
   log: Function;
   name: string;
+  frunk: ?string;
   vin: string;
   username: string;
   password: string;
@@ -32,43 +35,72 @@ class TeslaAccessory {
 
   // Services exposed.
   lockService: Object;
+  frunkService: ?Object;
   climateService: Object;
 
   constructor(log, config) {
     this.log = log;
     this.name = config["name"];
+    this.frunk = config["frunk"];
     this.vin = config["vin"];
     this.username = config["username"];
     this.password = config["password"];
 
-    this.lockService = new Service.LockMechanism(this.name);
+    const lockService = new Service.LockMechanism(this.name, 'vehicle');
 
-    this.lockService
+    lockService
       .getCharacteristic(Characteristic.LockCurrentState)
       .on('get', callbackify(this.getLockCurrentState));
 
-    this.lockService
+    lockService
       .getCharacteristic(Characteristic.LockTargetState)
       .on('get', callbackify(this.getLockTargetState))
       .on('set', callbackify(this.setLockTargetState));
 
-    this.climateService = new Service.Switch(this.name);
+    this.lockService = lockService;
 
-    this.climateService
+    const climateService = new Service.Switch(this.name);
+
+    climateService
       .getCharacteristic(Characteristic.On)
       .on('get', callbackify(this.getClimateOn))
       .on('set', callbackify(this.setClimateOn));
+
+    this.climateService = climateService;
+
+    if (this.frunk) {
+      // Enable the front trunk lock service if requested. Use the name given
+      // in your config.
+      const frunkService = new Service.LockMechanism(this.frunk, 'frunk');
+
+      frunkService
+        .getCharacteristic(Characteristic.LockCurrentState)
+        .on('get', callbackify(this.getFrunkCurrentState));
+
+      frunkService
+        .getCharacteristic(Characteristic.LockTargetState)
+        .on('get', callbackify(this.getFrunkTargetState))
+        .on('set', callbackify(this.setFrunkTargetState));
+
+      this.frunkService = frunkService;
+    }
   }
 
   getServices() {
-    return [this.lockService, this.climateService];
+    const {lockService, climateService, frunkService} = this;
+    return [lockService, climateService, ...frunkService ? [frunkService] : []];
   }
+
+  //
+  // Vehicle Lock
+  //
 
   getLockCurrentState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // Wake up, this is important!
+    await this.wakeUp();
+
     const state: VehicleState = await api('vehicleState', options);
 
     return state.locked ?
@@ -79,8 +111,9 @@ class TeslaAccessory {
   getLockTargetState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // Wake up, this is important!
+    await this.wakeUp();
+
     const state: VehicleState = await api('vehicleState', options);
 
     return state.locked ?
@@ -123,11 +156,16 @@ class TeslaAccessory {
     }
   }
 
+  //
+  // Climate Switch
+  //
+
   getClimateOn = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // Wake up, this is important!
+    await this.wakeUp();
+
     const state: ClimateState = await api('climateState', options);
 
     const on = state.is_auto_conditioning_on;
@@ -152,6 +190,87 @@ class TeslaAccessory {
     }
   }
 
+  //
+  // Front Trunk
+  //
+
+  getFrunkCurrentState = async () => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    const state: VehicleState = await api('vehicleState', options);
+
+    return state.ft ?
+      Characteristic.LockCurrentState.UNSECURED :
+      Characteristic.LockCurrentState.SECURED;
+  }
+
+  getFrunkTargetState = async () => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    const state: VehicleState = await api('vehicleState', options);
+
+    return state.ft ?
+      Characteristic.LockTargetState.UNSECURED :
+      Characteristic.LockTargetState.SECURED;
+  }
+
+  setFrunkTargetState = async (state) => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    this.log('Set frunk state to', state);
+
+    if (state === Characteristic.LockTargetState.SECURED) {
+      throw new Error('Cannot close an open frunk.');
+    }
+    else {
+      await api('openTrunk', options, tesla.FRUNK);
+    }
+
+    // We succeeded, so update the "current" state as well.
+    // We need to update the current state "later" because Siri can't
+    // handle receiving the change event inside the same "set target state"
+    // response.
+    await wait(1);
+
+    const {frunkService} = this;
+
+    frunkService && frunkService.setCharacteristic(
+      Characteristic.LockCurrentState,
+      Characteristic.LockCurrentState.UNSECURED,
+    );
+  }
+
+  //
+  // General
+  //
+
+  getOptions = async (): Promise<{authToken: string, vehicleID: string}> => {
+    // Use a mutex to prevent multiple logins happening in parallel.
+    const unlock = await lock('getOptions', 20000);
+
+    try {
+      // First login if we don't have a token.
+      const authToken = await this.getAuthToken();
+
+      // Grab the string ID of your vehicle.
+      const {id_s: vehicleID} = await this.getVehicle();
+
+      return {authToken, vehicleID};
+    }
+    finally {
+      unlock();
+    }
+  }
+
   getAuthToken = async (): Promise<string> => {
     const {username, password, authToken} = this;
 
@@ -166,17 +285,6 @@ class TeslaAccessory {
     this.log('Got a login token.');
     this.authToken = token;
     return token;
-  }
-
-  getOptions = async (): Promise<{authToken: string, vehicleID: string}> => {
-
-    // First login if we don't have a token.
-    const authToken = await this.getAuthToken();
-
-    // Grab the string ID of your vehicle.
-    const {id_s: vehicleID} = await this.getVehicle();
-
-    return {authToken, vehicleID};
   }
 
   getVehicle = async () => {
