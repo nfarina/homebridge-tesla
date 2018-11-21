@@ -98,9 +98,8 @@ class TeslaAccessory {
   getLockCurrentState = async () => {
     const options = await this.getOptions();
 
-    // Wake up, this is important!
-    await this.wakeUp();
-
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
     const state: VehicleState = await api('vehicleState', options);
 
     return state.locked ?
@@ -111,9 +110,8 @@ class TeslaAccessory {
   getLockTargetState = async () => {
     const options = await this.getOptions();
 
-    // Wake up, this is important!
-    await this.wakeUp();
-
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
     const state: VehicleState = await api('vehicleState', options);
 
     return state.locked ?
@@ -163,9 +161,8 @@ class TeslaAccessory {
   getClimateOn = async () => {
     const options = await this.getOptions();
 
-    // Wake up, this is important!
-    await this.wakeUp();
-
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
     const state: ClimateState = await api('climateState', options);
 
     const on = state.is_auto_conditioning_on;
@@ -197,9 +194,8 @@ class TeslaAccessory {
   getFrunkCurrentState = async () => {
     const options = await this.getOptions();
 
-    // Wake up, this is important!
-    await this.wakeUp();
-
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
     const state: VehicleState = await api('vehicleState', options);
 
     return state.ft ?
@@ -210,9 +206,8 @@ class TeslaAccessory {
   getFrunkTargetState = async () => {
     const options = await this.getOptions();
 
-    // Wake up, this is important!
-    await this.wakeUp();
-
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
     const state: VehicleState = await api('vehicleState', options);
 
     return state.ft ?
