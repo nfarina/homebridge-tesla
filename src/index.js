@@ -25,6 +25,7 @@ class TeslaAccessory {
   log: Function;
   name: string;
   frunk: ?string;
+  chargePort: ?string;
   vin: string;
   username: string;
   password: string;
@@ -36,12 +37,14 @@ class TeslaAccessory {
   // Services exposed.
   lockService: Object;
   frunkService: ?Object;
+  chargePortService: ?Object;
   climateService: Object;
 
   constructor(log, config) {
     this.log = log;
     this.name = config["name"];
     this.frunk = config["frunk"];
+    this.chargePort = config["chargePort"];
     this.vin = config["vin"];
     this.username = config["username"];
     this.password = config["password"];
@@ -84,11 +87,29 @@ class TeslaAccessory {
 
       this.frunkService = frunkService;
     }
+
+    if (this.chargePort) {
+      // Enable the charge port trunk lock service if requested. Use the name given
+      // in your config.
+      const chargePortService = new Service.LockMechanism(this.chargePort, 'chargePort');
+
+      chargePortService
+        .getCharacteristic(Characteristic.LockCurrentState)
+        .on('get', callbackify(this.getChargePortCurrentState));
+
+      chargePortService
+        .getCharacteristic(Characteristic.LockTargetState)
+        .on('get', callbackify(this.getChargePortTargetState))
+        .on('set', callbackify(this.setChargePortTargetState));
+
+      this.chargePortService = chargePortService;
+    }
+
   }
 
   getServices() {
-    const {lockService, climateService, frunkService} = this;
-    return [lockService, climateService, ...frunkService ? [frunkService] : []];
+    const {lockService, climateService, frunkService, chargePortService} = this;
+    return [lockService, climateService, ...frunkService ? [frunkService] : [], ...chargePortService ? [chargePortService] :[]];
   }
 
   //
@@ -242,6 +263,69 @@ class TeslaAccessory {
       Characteristic.LockCurrentState,
       Characteristic.LockCurrentState.UNSECURED,
     );
+  }
+
+  // Charge Port
+
+  getChargePortCurrentState = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
+    const state: VehicleData = await api('vehicleData', options);
+
+    console.log(state);
+
+    return state.charge_state.charge_port_door_open ?
+      Characteristic.LockCurrentState.UNSECURED :
+      Characteristic.LockCurrentState.SECURED;
+  }
+
+  getChargePortTargetState = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
+    const state: VehicleData = await api('vehicleData', options);
+
+    return state.charge_state.charge_port_door_open ?
+      Characteristic.LockTargetState.UNSECURED :
+      Characteristic.LockTargetState.SECURED;
+  }
+
+  setChargePortTargetState = async (state) => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    this.log('Set charge port state to', state);
+
+    if (state === Characteristic.LockTargetState.SECURED) {
+      await api('closeChargePort', options)
+    }
+    else {
+      await api('openChargePort', options);
+    }
+
+    // We succeeded, so update the "current" state as well.
+    // We need to update the current state "later" because Siri can't
+    // handle receiving the change event inside the same "set target state"
+    // response.
+    await wait(1);
+
+    if (state == Characteristic.LockTargetState.SECURED) {
+      this.chargePortService.setCharacteristic(
+        Characteristic.LockCurrentState,
+        Characteristic.LockCurrentState.SECURED,
+      );
+    }
+    else {
+      this.chargePortService.setCharacteristic(
+        Characteristic.LockCurrentState,
+        Characteristic.LockCurrentState.UNSECURED,
+      );
+    }
   }
 
   //
