@@ -12,7 +12,8 @@ Example config.json:
           "chargePort": "Charge Port",
           "vin": "5JJYCB522AB296261",
           "username": "bobs@burgers.com",
-          "password": "bobbobbaran"
+          "password": "bobbobbaran",
+          "waitMinutes": 1
         }
       ]
     }
@@ -23,9 +24,12 @@ Exposes a Door Lock service and Climate Control on/off switch.
 it will expose a separate Lock service for the front trunk. You should pick
 a unique name for this lock, like "Front Trunk" in the example above.
 
-*If* you define a value for `chargePort` (as in the above example),
+*If* you define a value for `chargePort`,
 it will expose a separate Lock service for the charge port. You should pick
 a unique name for this lock, like "Charge Port" in the example above.
+
+*If* you define a value for `waitMinutes`, you can control the amount of
+time the plugin will wait for the car to wake up. The default is one minute.
 
 If you use the example above, you would gain Siri commands like:
 

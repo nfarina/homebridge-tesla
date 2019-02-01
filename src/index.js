@@ -29,6 +29,7 @@ class TeslaAccessory {
   vin: string;
   username: string;
   password: string;
+  waitMinutes: number;
 
   // Runtime state.
   authToken: ?string;
@@ -48,6 +49,7 @@ class TeslaAccessory {
     this.vin = config["vin"];
     this.username = config["username"];
     this.password = config["password"];
+    this.wait = config["waitMinutes"] || 1; // default to one minute.
 
     const lockService = new Service.LockMechanism(this.name, 'vehicle');
 
@@ -400,11 +402,10 @@ class TeslaAccessory {
     await api('wakeUp', options);
 
     // Wait up to 30 seconds for the car to wake up.
-    const THIRTY_SECONDS = 30 * 1000;
     const start = Date.now();
     let waitTime = 1000;
 
-    while ((Date.now() - start) < THIRTY_SECONDS) {
+    while ((Date.now() - start) < this.waitMinutes) {
 
       // Poll Tesla for the latest on this vehicle.
       const {state} = await this.getVehicle();
@@ -421,6 +422,6 @@ class TeslaAccessory {
       waitTime = Math.min(waitTime * 2, 5000);
     }
 
-    throw new Error('Vehicle did not wake up within 30 seconds.');
+    throw new Error(`Vehicle did not wake up within ${this.waitMinutes} minutes.`);
   }
 }
