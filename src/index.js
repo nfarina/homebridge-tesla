@@ -49,7 +49,7 @@ class TeslaAccessory {
     this.vin = config["vin"];
     this.username = config["username"];
     this.password = config["password"];
-    this.wait = config["waitMinutes"] || 1; // default to one minute.
+    this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
 
     const lockService = new Service.LockMechanism(this.name, 'vehicle');
 
@@ -405,7 +405,7 @@ class TeslaAccessory {
     const start = Date.now();
     let waitTime = 1000;
 
-    while ((Date.now() - start) < this.waitMinutes) {
+    while ((Date.now() - start) < this.waitMinutes * 60 * 1000) {
 
       // Poll Tesla for the latest on this vehicle.
       const {state} = await this.getVehicle();
