@@ -1,4 +1,5 @@
 {
+  "test": ["./**/*.ts", "./**/*.tsx"],
   "presets": [
     ["@babel/env", {
       "targets": {
@@ -6,7 +7,7 @@
       },
       "modules": false
     }],
-    "@babel/flow"
+    "@babel/typescript"
   ],
   "plugins": [
     "@babel/proposal-class-properties"
