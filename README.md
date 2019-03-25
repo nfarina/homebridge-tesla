@@ -13,6 +13,7 @@ Example config.json:
           "vin": "5JJYCB522AB296261",
           "username": "bobs@burgers.com",
           "password": "bobbobbaran",
+          "autoToken": "authToken"
           "waitMinutes": 1
         }
       ]
@@ -34,6 +35,12 @@ a unique name for this lock, like "Charge Port" in the example above.
 
 _If_ you define a value for `waitMinutes`, you can control the amount of
 time the plugin will wait for the car to wake up. The default is one minute.
+
+_If_ you define a value for `authToken`,
+you do not need to provide your username or password credentials.
+Generating a token can be done many ways.
+[Tokens for Teslas](https://tokens-for-teslas.herokuapp.com) is one option.
+`npm install -g generate-tesla-token` is another.
 
 If you use the example above, you would gain Siri commands like:
 

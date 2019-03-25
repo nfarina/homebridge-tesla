@@ -25,12 +25,12 @@ class TeslaAccessory {
   frunk: string | null;
   chargePort: string | null;
   vin: string;
-  username: string;
-  password: string;
+  username: string | null;
+  password: string | null;
   waitMinutes: number;
+  authToken: string | null;
 
   // Runtime state.
-  authToken: string | undefined;
   vehicleID: string | undefined;
 
   // Services exposed.
@@ -50,6 +50,7 @@ class TeslaAccessory {
     this.username = config["username"];
     this.password = config["password"];
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
+    this.authToken = config["authToken"];
 
     const lockService = new Service.LockMechanism(this.name, "vehicle");
 
