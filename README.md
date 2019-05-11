@@ -10,6 +10,10 @@ Example config.json:
           "trunk": "Trunk",
           "frunk": "Front Trunk",
           "chargePort": "Charge Port",
+          "charge": "Charging",
+          "home": "Home",
+          "home_lat": "51.9000000",
+          "home_long": "0.000000",
           "vin": "5JJYCB522AB296261",
           "username": "bobs@burgers.com",
           "password": "bobbobbaran",
@@ -32,6 +36,15 @@ a unique name for this lock, like "Front Trunk" in the example above.
 _If_ you define a value for `chargePort`,
 it will expose a separate Lock service for the charge port. You should pick
 a unique name for this lock, like "Charge Port" in the example above.
+
+_If_ you define a value for `charge`,
+it will expose a separate Switch service to see or toggle the Charging state. You should pick
+a unique name for this lock, like "Charge" in the example above.
+
+_If_ you define a value for `home`,
+it will expose a separate Contact service to signal that the Tesla is home. You should pick
+a unique name for this lock, like "Home" in the example above.
+Also specificy the latitude and longitude for this to work.
 
 _If_ you define a value for `waitMinutes`, you can control the amount of
 time the plugin will wait for the car to wake up. The default is one minute.
