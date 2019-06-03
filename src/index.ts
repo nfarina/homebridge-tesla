@@ -24,6 +24,7 @@ class TeslaAccessory {
   trunk: string | null;
   frunk: string | null;
   chargePort: string | null;
+  chargeState: any | null;
   vin: string;
   username: string | null;
   password: string | null;
@@ -39,6 +40,7 @@ class TeslaAccessory {
   frunkService: any;
   chargePortService: any;
   climateService: any;
+  batteryService: any;
 
   constructor(log, config) {
     this.log = log;
@@ -51,6 +53,7 @@ class TeslaAccessory {
     this.password = config["password"];
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
     this.authToken = config["authToken"];
+    this.chargeState = config["chargeState"];
 
     const lockService = new Service.LockMechanism(this.name, "vehicle");
 
@@ -127,6 +130,24 @@ class TeslaAccessory {
 
       this.chargePortService = chargePortService;
     }
+
+    if (this.chargeState) {
+      const batteryService = new Service.BatteryService();
+
+      batteryService
+        .getCharacteristic(Characteristic.ChargingState)
+        .on("get", callbackify(this.getChargingState));
+
+      batteryService
+        .getCharacteristic(Characteristic.BatteryLevel)
+        .on("get", callbackify(this.getBatteryLevel));
+
+      batteryService
+        .getCharacteristic(Characteristic.StatusLowBattery)
+        .on("get", callbackify(this.getBatteryStatus));
+
+      this.batteryService = batteryService;
+    }
   }
 
   getServices() {
@@ -136,6 +157,7 @@ class TeslaAccessory {
       trunkService,
       frunkService,
       chargePortService,
+      batteryService,
     } = this;
     return [
       lockService,
@@ -143,6 +165,7 @@ class TeslaAccessory {
       ...(trunkService ? [trunkService] : []),
       ...(frunkService ? [frunkService] : []),
       ...(chargePortService ? [chargePortService] : []),
+      ...(batteryService ? [batteryService] : []),
     ];
   }
 
@@ -414,6 +437,51 @@ class TeslaAccessory {
         Characteristic.LockCurrentState,
         Characteristic.LockCurrentState.UNSECURED,
       );
+    }
+  };
+
+  //
+  // Charge State
+  //
+
+  getChargingState = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
+    const state: VehicleData = await api("vehicleData", options);
+
+    const chargingState = state.charge_state.charging_state;
+    switch (chargingState) {
+      case 'Disconnected':
+      case 'Complete':
+        return Characteristic.ChargingState.NOT_CHARGING;
+      case 'Charging':
+        return Characteristic.ChargingState.CHARGING;
+      default:
+        this.log(`Unknown charging state: ${chargingState}`);
+        return Characteristic.ChargingState.NOT_CHARGING;
+    }
+  };
+
+  getBatteryLevel = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
+    const state: VehicleData = await api("vehicleData", options);
+
+    return state.charge_state.battery_level;
+  };
+
+  getBatteryStatus = async () => {
+    const batteryLevel = await this.getBatteryLevel();
+    const alertLowBattery = this.chargeState.alertLowBattery || 20;
+
+    if (batteryLevel <= alertLowBattery) {
+       return Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
+    } else {
+      return Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
     }
   };
 

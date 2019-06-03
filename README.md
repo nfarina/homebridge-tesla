@@ -10,6 +10,9 @@ Example config.json:
           "trunk": "Trunk",
           "frunk": "Front Trunk",
           "chargePort": "Charge Port",
+          "chargingState": {
+            "alertLowBattery": 20
+          },
           "vin": "5JJYCB522AB296261",
           "username": "bobs@burgers.com",
           "password": "bobbobbaran",
@@ -32,6 +35,12 @@ a unique name for this lock, like "Front Trunk" in the example above.
 _If_ you define a value for `chargePort`,
 it will expose a separate Lock service for the charge port. You should pick
 a unique name for this lock, like "Charge Port" in the example above.
+
+_If_ you define an object for `chargingState`,
+it will add a battery service that will show battery level and charging status
+in all of the accessories. Within this object you can define
+`alertLowBattery` which specifies the percentage under which "Battery Low"
+alert will show. The default is 20.
 
 _If_ you define a value for `waitMinutes`, you can control the amount of
 time the plugin will wait for the car to wake up. The default is one minute.
@@ -84,6 +93,8 @@ If you use the example above, you would gain Siri commands like:
 - _"Open the Trunk"_ (pop the trunk on the Model 3)
 - _"Open the Pod Bay Doors"_ (pop the trunk **on the Model X**)
 - _"Turn on the Model X"_ (turn on climate control **on the Model X**)
+- _"What's Model 3's battery?"_ (report battery percentage of the Model 3)
+- _"What's the charging status of Model 3?"_ (report charging status of the Model 3)
 
 **Important Note**: The names you choose for the various locks are essentially
 _global_. That means if you want to open the front trunks of both your Model 3
