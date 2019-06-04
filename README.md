@@ -16,7 +16,7 @@ Example config.json:
           "vin": "5JJYCB522AB296261",
           "username": "bobs@burgers.com",
           "password": "bobbobbaran",
-          "authToken": "authToken"
+          "authToken": "authToken",
           "waitMinutes": 1
         }
       ]
