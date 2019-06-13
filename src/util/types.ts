@@ -231,7 +231,7 @@ export interface VehicleData {
     charger_pilot_current: number; // 48,
     charger_power: number; // 0,
     charger_voltage: number; // 0,
-    charging_state: string; // "Disconnected",
+    charging_state: "Disconnected" | "Stopped" | "Charging";
     conn_charge_cable: string; // "<invalid>",
     est_battery_range: number; // 136.03,
     fast_charger_brand: number; // "<invalid>",

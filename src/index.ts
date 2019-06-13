@@ -21,10 +21,14 @@ class TeslaAccessory {
   // From config.
   log: Function;
   name: string;
+  connection: string | null;
+  charger: string | null;
+  climate: string | null;
   trunk: string | null;
   frunk: string | null;
   chargePort: string | null;
-  chargeState: any | null;
+  chargeState: string | null;
+  lowBatteryLevel: number | null;
   vin: string;
   username: string | null;
   password: string | null;
@@ -36,15 +40,20 @@ class TeslaAccessory {
 
   // Services exposed.
   lockService: any;
+  connectionService: any;
+  chargerService: any;
+  batteryService: any;
+  climateService: any;
   trunkService: any;
   frunkService: any;
   chargePortService: any;
-  climateService: any;
-  batteryService: any;
 
   constructor(log, config) {
     this.log = log;
     this.name = config["name"];
+    this.connection = config["connection"];
+    this.charger = config["charger"];
+    this.climate = config["climate"];
     this.trunk = config["trunk"];
     this.frunk = config["frunk"];
     this.chargePort = config["chargePort"];
@@ -54,6 +63,13 @@ class TeslaAccessory {
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
     this.authToken = config["authToken"];
     this.chargeState = config["chargeState"];
+    this.lowBatteryLevel = config["lowBatteryLevel"];
+
+    //
+    // Door Lock
+    //
+
+    this.log(`Creating lock service: "Unlock the ${this.name}"`);
 
     const lockService = new Service.LockMechanism(this.name, "vehicle");
 
@@ -68,16 +84,93 @@ class TeslaAccessory {
 
     this.lockService = lockService;
 
-    const climateService = new Service.Switch(this.name);
+    //
+    // Battery Status
+    //
 
-    climateService
-      .getCharacteristic(Characteristic.On)
-      .on("get", callbackify(this.getClimateOn))
-      .on("set", callbackify(this.setClimateOn));
+    this.log(
+      `Creating battery service: "What's the battery level of the ${
+        this.name
+      }"`,
+    );
 
-    this.climateService = climateService;
+    const batteryService = new Service.BatteryService(this.name);
+
+    batteryService
+      .getCharacteristic(Characteristic.ChargingState)
+      .on("get", callbackify(this.getChargingState));
+
+    batteryService
+      .getCharacteristic(Characteristic.BatteryLevel)
+      .on("get", callbackify(this.getBatteryLevel));
+
+    batteryService
+      .getCharacteristic(Characteristic.StatusLowBattery)
+      .on("get", callbackify(this.getBatteryStatus));
+
+    this.batteryService = batteryService;
+
+    //
+    // Online Switch
+    //
+
+    if (this.connection) {
+      this.log(`Creating wakeup switch: "Turn on the ${this.connection}"`);
+
+      const connectionService = new Service.Switch(
+        this.connection,
+        "connection",
+      );
+
+      connectionService
+        .getCharacteristic(Characteristic.On)
+        .on("get", callbackify(this.getConnectionOn))
+        .on("set", callbackify(this.setConnectionOn));
+
+      this.connectionService = connectionService;
+    }
+
+    //
+    // Charger
+    //
+
+    if (this.charger) {
+      this.log(`Creating charger service: "Turn on the ${this.charger}"`);
+
+      const chargerService = new Service.Switch(this.charger, "charger");
+
+      chargerService
+        .getCharacteristic(Characteristic.On)
+        .on("get", callbackify(this.getChargerOn))
+        .on("set", callbackify(this.setChargerOn));
+
+      this.chargerService = chargerService;
+    }
+
+    //
+    // Climate Control Switch
+    //
+
+    if (this.climate) {
+      this.log(`Creating climate service: "Turn on the ${this.climate}"`);
+
+      const climateService = new Service.Switch(this.climate, "climate");
+
+      climateService
+        .getCharacteristic(Characteristic.On)
+        .on("get", callbackify(this.getClimateOn))
+        .on("set", callbackify(this.setClimateOn));
+
+      this.climateService = climateService;
+    }
+
+    //
+    // Trunk Lock
+    //
 
     if (this.trunk) {
+      this.log(`Creating trunk lock service: "Open the ${this.trunk}"`);
+
       // Enable the rear trunk lock service if requested. Use the name given
       // in your config.
       const trunkService = new Service.LockMechanism(this.trunk, "trunk");
@@ -92,9 +185,19 @@ class TeslaAccessory {
         .on("set", callbackify(this.setTrunkTargetState));
 
       this.trunkService = trunkService;
+    } else {
+      this.log(
+        "No trunk service requested; check README for instructions on how to enable.",
+      );
     }
 
+    //
+    // Frunk Lock
+    //
+
     if (this.frunk) {
+      this.log(`Creating frunk lock service: "Open the ${this.frunk}"`);
+
       // Enable the front trunk lock service if requested. Use the name given
       // in your config.
       const frunkService = new Service.LockMechanism(this.frunk, "frunk");
@@ -109,9 +212,19 @@ class TeslaAccessory {
         .on("set", callbackify(this.setFrunkTargetState));
 
       this.frunkService = frunkService;
+    } else {
+      this.log(
+        "No frunk service requested; check README for instructions on how to enable.",
+      );
     }
 
+    //
+    // Charge Port Lock
+    //
+
     if (this.chargePort) {
+      this.log(`Creating charge port service: "Open the ${this.chargePort}"`);
+
       // Enable the charge port trunk lock service if requested. Use the name given
       // in your config.
       const chargePortService = new Service.LockMechanism(
@@ -129,43 +242,33 @@ class TeslaAccessory {
         .on("set", callbackify(this.setChargePortTargetState));
 
       this.chargePortService = chargePortService;
-    }
-
-    if (this.chargeState) {
-      const batteryService = new Service.BatteryService();
-
-      batteryService
-        .getCharacteristic(Characteristic.ChargingState)
-        .on("get", callbackify(this.getChargingState));
-
-      batteryService
-        .getCharacteristic(Characteristic.BatteryLevel)
-        .on("get", callbackify(this.getBatteryLevel));
-
-      batteryService
-        .getCharacteristic(Characteristic.StatusLowBattery)
-        .on("get", callbackify(this.getBatteryStatus));
-
-      this.batteryService = batteryService;
+    } else {
+      this.log(
+        "No charge port service requested; check README for instructions on how to enable.",
+      );
     }
   }
 
   getServices() {
     const {
       lockService,
+      batteryService,
+      connectionService,
+      chargerService,
       climateService,
       trunkService,
       frunkService,
       chargePortService,
-      batteryService,
     } = this;
     return [
       lockService,
-      climateService,
+      batteryService,
+      connectionService,
+      ...(chargerService ? [chargerService] : []),
+      ...(climateService ? [climateService] : []),
       ...(trunkService ? [trunkService] : []),
       ...(frunkService ? [frunkService] : []),
       ...(chargePortService ? [chargePortService] : []),
-      ...(batteryService ? [batteryService] : []),
     ];
   }
 
@@ -176,8 +279,7 @@ class TeslaAccessory {
   getLockCurrentState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: VehicleState = await api("vehicleState", options);
 
     return state.locked
@@ -188,8 +290,7 @@ class TeslaAccessory {
   getLockTargetState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: VehicleState = await api("vehicleState", options);
 
     return state.locked
@@ -231,14 +332,72 @@ class TeslaAccessory {
   };
 
   //
+  // Wakeup Switch
+  //
+
+  getConnectionOn = async () => {
+    const options = await this.getOptions();
+
+    // Poll Tesla for the latest on this vehicle.
+    const { state } = await this.getVehicle();
+
+    this.log("Vehicle state:", state);
+
+    return state === "online";
+  };
+
+  setConnectionOn = async on => {
+    const options = await this.getOptions();
+
+    if (on) {
+      this.log("Waking up vehicle");
+      await this.wakeUp();
+    } else {
+      this.log(
+        "Ignoring command to turn off vehicle (it will sleep on its own)",
+      );
+    }
+  };
+
+  //
+  // Charger Switch
+  //
+
+  getChargerOn = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online.
+    const state: VehicleData = await api("vehicleData", options);
+
+    const on = state.charge_state.charging_state === "Charging";
+
+    this.log("Charging?", on);
+    return on;
+  };
+
+  setChargerOn = async (on: boolean) => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    this.log("Set charging to", on);
+
+    if (on) {
+      await api("startCharge", options);
+    } else {
+      await api("stopCharge", options);
+    }
+  };
+
+  //
   // Climate Switch
   //
 
   getClimateOn = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: ClimateState = await api("climateState", options);
 
     const on = state.is_auto_conditioning_on;
@@ -269,8 +428,7 @@ class TeslaAccessory {
   getTrunkCurrentState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: VehicleState = await api("vehicleState", options);
 
     return state.rt
@@ -281,8 +439,7 @@ class TeslaAccessory {
   getTrunkTargetState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: VehicleState = await api("vehicleState", options);
 
     return state.rt
@@ -331,8 +488,7 @@ class TeslaAccessory {
   getFrunkCurrentState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: VehicleState = await api("vehicleState", options);
 
     return state.ft
@@ -343,8 +499,7 @@ class TeslaAccessory {
   getFrunkTargetState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: VehicleState = await api("vehicleState", options);
 
     return state.ft
@@ -386,8 +541,7 @@ class TeslaAccessory {
   getChargePortCurrentState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: VehicleData = await api("vehicleData", options);
 
     return state.charge_state.charge_port_door_open
@@ -398,8 +552,7 @@ class TeslaAccessory {
   getChargePortTargetState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only succeed if the car is already online.
     const state: VehicleData = await api("vehicleData", options);
 
     return state.charge_state.charge_port_door_open
@@ -447,16 +600,17 @@ class TeslaAccessory {
   getChargingState = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    this.log("Getting charging state");
+
+    // This will only work if the vehicle is awake already.
     const state: VehicleData = await api("vehicleData", options);
 
     const chargingState = state.charge_state.charging_state;
     switch (chargingState) {
-      case 'Disconnected':
-      case 'Complete':
+      case "Disconnected":
+      case "Complete":
         return Characteristic.ChargingState.NOT_CHARGING;
-      case 'Charging':
+      case "Charging":
         return Characteristic.ChargingState.CHARGING;
       default:
         this.log(`Unknown charging state: ${chargingState}`);
@@ -467,8 +621,7 @@ class TeslaAccessory {
   getBatteryLevel = async () => {
     const options = await this.getOptions();
 
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // This will only work if the vehicle is awake already.
     const state: VehicleData = await api("vehicleData", options);
 
     return state.charge_state.battery_level;
@@ -476,10 +629,10 @@ class TeslaAccessory {
 
   getBatteryStatus = async () => {
     const batteryLevel = await this.getBatteryLevel();
-    const alertLowBattery = this.chargeState.alertLowBattery || 20;
+    const lowBatteryLevel = this.lowBatteryLevel || 20;
 
-    if (batteryLevel <= alertLowBattery) {
-       return Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
+    if (batteryLevel <= lowBatteryLevel) {
+      return Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW;
     } else {
       return Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
     }
@@ -555,6 +708,8 @@ class TeslaAccessory {
 
   wakeUp = async () => {
     const options = await this.getOptions();
+
+    this.log(`Waking up…`);
 
     // Send the command.
     await api("wakeUp", options);
