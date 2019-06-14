@@ -1,0 +1,81 @@
+{
+	"pluginAlias": "Tesla",
+	"pluginType": "accessory",
+	"schema": {
+		"type": "object",
+		"properties": {
+			"name": {
+				"title": "name",
+				"type": "string",
+				"required": true,
+				"default": "Tesla Model S"
+			},
+			"trunk": {
+				"title": "Trunk",
+				"type": "string",
+				"required": true,
+				"default": "Trunk"
+			},
+			"frunk": {
+				"title": "Front Trunk",
+				"type": "string",
+				"required": true,
+				"default": "Front Trunk"
+			},
+			"chargePort": {
+				"title": "Charge Port",
+				"type": "string",
+				"required": true,
+				"default": "Charge Port"
+			},
+			"vin": {
+				"title": "VIN",
+				"type": "string",
+				"required": true,
+				"default": ""
+			},
+			"authToken": {
+				"title": "Tesla authentication token (not required when using username/password)",
+				"type": "string",
+				"required": false,
+				"default": "",
+				"description": "Read the <a href='https://github.com/nfarina/homebridge-tesla'>documentation</a> to learn how to create a token."
+			},
+			"username": {
+				"title": "Tesla username (not required when using authentication token)",
+				"type": "string",
+				"required": false,
+				"default": ""
+			},
+			"password": {
+				"title": "Tesla password (not required when using authentication token)",
+				"type": "string",
+				"required": false,
+				"default": ""
+			},
+			"waitMinutes": {
+				"title": "Time in minutes to wait for the car to wake up (default is 1 minute)",
+				"type": "integer",
+				"default": 1,
+				"maximum": 10,
+				"minimum": 1,
+        		"required": false,
+				"description": "Default is one (1) minute."
+			},
+			"chargeState": {
+    			"type": "object",
+        		"properties": {
+        		"alertLowBattery": {
+					"title": "Battery warning level",
+					"type": "integer",
+					"default": 20,
+					"maximum": 100,
+					"minimum": 0,
+        			"required": false,
+					"description": "Specifies the percentage under which 'Battery Low' alert will show. The default is 20."
+        			}
+                 }
+    		}
+	    }
+    }
+}
