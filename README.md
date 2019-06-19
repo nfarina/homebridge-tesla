@@ -28,11 +28,21 @@ By default, it exposes a Door Lock and Battery service.
 Siri commands (based on above example):
 
 - _"Open the Model 3"_ (unlock the vehicle)
-- _"What's the battery status of the Model 3?"_
+- _"What's the battery status of the Model 3?"_ (vehicle must be awake)
 
 If you define a value for `lowBatteryLevel` (as in the above example), you may customize the threshold at which HomeKit will display the car as being "Low Battery". The default threshold is <= 20%.
 
 If you define a value for `waitMinutes` (as in the above example), you can control the amount of time the plugin will wait for the car to wake up. The default is one minute.
+
+### Behavior While Sleeping
+
+The car must be "awake" in order to retrieve the current state of things. This plugin will _not_ wake up the car for "read" commands. That means if you ask Siri something like "Is the Model 3 locked?" it will fail unless the car is already awake. If you ask Siri to _change_ the state of something, like "Unlock the Model 3" then the plugin will wake up the car first so the command can succeed. After that you can issue read commands, like "Is the Model 3 unlocked?" and it will work until the car sleeps again.
+
+### Why not wake up the car for all commands?
+
+You might wonder, if the plugin can wake the car up, why not wake it up for read commands? The problem is that HomeKit will often "check" on the state of things like "Is the car locked…" without you explicitly asking about it. If we were to wake the car up every time HomeKit decided to check on things, it could have a negative impact on your car's battery.
+
+The good news is that you can wake up the car explicitly through Siri yourself, after which these commands will work for a time. See the Connection section below.
 
 ## Auth Token
 
