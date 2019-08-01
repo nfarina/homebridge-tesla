@@ -681,7 +681,7 @@ class TeslaAccessory {
     // Only way to do this is to get ALL vehicles then filter out the one
     // we want.
     const authToken = await this.getAuthToken();
-    const vehicles: Vehicle[] = await api("allVehicles", { authToken });
+    const vehicles: Vehicle[] = await api("vehicles", { authToken });
 
     // Now figure out which vehicle matches your VIN.
     // `vehicles` is something like:
