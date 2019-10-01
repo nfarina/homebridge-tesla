@@ -23,7 +23,7 @@
   ],
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
-    "teslajs": "^2.1.45"
+    "teslajs": "^4.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
