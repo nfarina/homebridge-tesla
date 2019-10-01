@@ -36,6 +36,7 @@ class TeslaAccessory {
   frunkService: any;
   climateService: any;
   chargerService: any;
+  starterService: any;
 
   constructor(log, config) {
     this.log = log;
@@ -105,8 +106,7 @@ class TeslaAccessory {
 
     this.frunkService = frunkService;
 
-    // Enable the charge port trunk lock service if requested. Use the name given
-    // in your config.
+    // Enable the charger service; allows you to turn on/off car charging.
     const chargerService = new Service.Switch(
       this.name + " Charger",
       "charger",
@@ -118,6 +118,19 @@ class TeslaAccessory {
       .on("set", callbackify(this.setChargerOn));
 
     this.chargerService = chargerService;
+
+    // Remote start service lets you initiate keyless driving.
+    const starterService = new Service.Switch(
+      this.name + " Starter",
+      "starter",
+    );
+
+    starterService
+      .getCharacteristic(Characteristic.On)
+      .on("get", callbackify(this.getStarterOn))
+      .on("set", callbackify(this.setStarterOn));
+
+    this.starterService = starterService;
   }
 
   getServices() {
@@ -127,6 +140,7 @@ class TeslaAccessory {
       this.trunkService,
       this.frunkService,
       this.chargerService,
+      this.starterService,
     ];
   }
 
@@ -370,6 +384,37 @@ class TeslaAccessory {
       await api("startCharge", options);
     } else {
       await api("stopCharge", options);
+    }
+  };
+
+  //
+  // Starter Switch (Remote start)
+  //
+
+  getStarterOn = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online.
+    const state: VehicleData = await api("vehicleData", options);
+
+    const on = !!state.vehicle_state.remote_start;
+
+    this.log("Remote start active?", on);
+    return on;
+  };
+
+  setStarterOn = async (on: boolean) => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    this.log("Set remote starter to", on);
+
+    if (on) {
+      await tesla.remoteStartAsync(options, this.password);
+    } else {
+      throw new Error("Cannot turn off the remote starter.");
     }
   };
 
