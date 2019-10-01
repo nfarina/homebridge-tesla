@@ -217,7 +217,6 @@ class TeslaAccessory {
     const state: ClimateState = await api("climateState", options);
 
     const on = state.is_climate_on;
-    console.log(JSON.stringify(state, null, 2));
 
     this.log("Climate on?", on);
     return on;
