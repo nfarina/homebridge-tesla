@@ -216,7 +216,8 @@ class TeslaAccessory {
     // wake it up just to see if climate is on because that could drain battery!
     const state: ClimateState = await api("climateState", options);
 
-    const on = state.is_auto_conditioning_on;
+    const on = state.is_climate_on;
+    console.log(JSON.stringify(state, null, 2));
 
     this.log("Climate on?", on);
     return on;
