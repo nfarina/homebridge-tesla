@@ -47,7 +47,10 @@ class TeslaAccessory {
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
     this.authToken = config["authToken"];
 
-    const lockService = new Service.LockMechanism(this.name, "vehicle");
+    const lockService = new Service.LockMechanism(
+      this.name + " Doors",
+      "vehicle",
+    );
 
     lockService
       .getCharacteristic(Characteristic.LockCurrentState)
