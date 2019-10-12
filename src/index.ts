@@ -39,18 +39,16 @@ class TeslaAccessory {
   starterService: any;
 
   constructor(log, config) {
+    const baseName = config["name"];
     this.log = log;
-    this.name = config["name"] + " Vehicle";
+    this.name = baseName + " Vehicle";
     this.vin = config["vin"];
     this.username = config["username"];
     this.password = config["password"];
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
     this.authToken = config["authToken"];
 
-    const lockService = new Service.LockMechanism(
-      this.name + " Doors",
-      "doors",
-    );
+    const lockService = new Service.LockMechanism(baseName + " Doors", "doors");
 
     lockService
       .getCharacteristic(Characteristic.LockCurrentState)
@@ -63,10 +61,7 @@ class TeslaAccessory {
 
     this.lockService = lockService;
 
-    const climateService = new Service.Switch(
-      this.name + " Climate",
-      "climate",
-    );
+    const climateService = new Service.Switch(baseName + " Climate", "climate");
 
     climateService
       .getCharacteristic(Characteristic.On)
@@ -77,7 +72,7 @@ class TeslaAccessory {
 
     // Enable the rear trunk lock service.
     const trunkService = new Service.LockMechanism(
-      this.name + " Trunk",
+      baseName + " Trunk",
       "trunk",
     );
 
@@ -94,7 +89,7 @@ class TeslaAccessory {
 
     // Enable the front trunk lock service.
     const frunkService = new Service.LockMechanism(
-      this.name + " Front Trunk",
+      baseName + " Front Trunk",
       "frunk",
     );
 
@@ -110,10 +105,7 @@ class TeslaAccessory {
     this.frunkService = frunkService;
 
     // Enable the charger service; allows you to turn on/off car charging.
-    const chargerService = new Service.Switch(
-      this.name + " Charger",
-      "charger",
-    );
+    const chargerService = new Service.Switch(baseName + " Charger", "charger");
 
     chargerService
       .getCharacteristic(Characteristic.On)
@@ -123,10 +115,7 @@ class TeslaAccessory {
     this.chargerService = chargerService;
 
     // Remote start service lets you initiate keyless driving.
-    const starterService = new Service.Switch(
-      this.name + " Starter",
-      "starter",
-    );
+    const starterService = new Service.Switch(baseName + " Starter", "starter");
 
     starterService
       .getCharacteristic(Characteristic.On)
