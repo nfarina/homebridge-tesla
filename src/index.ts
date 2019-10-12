@@ -40,7 +40,7 @@ class TeslaAccessory {
 
   constructor(log, config) {
     this.log = log;
-    this.name = config["name"];
+    this.name = config["name"] + " Vehicle";
     this.vin = config["vin"];
     this.username = config["username"];
     this.password = config["password"];
@@ -49,7 +49,7 @@ class TeslaAccessory {
 
     const lockService = new Service.LockMechanism(
       this.name + " Doors",
-      "vehicle",
+      "doors",
     );
 
     lockService
