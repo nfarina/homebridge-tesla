@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tesla",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Tesla support for Homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -19,7 +19,8 @@
   },
   "main": "dist/index.js",
   "files": [
-    "dist"
+    "dist",
+    "config.schema.json"
   ],
   "dependencies": {
     "@babel/polyfill": "^7.4.4",

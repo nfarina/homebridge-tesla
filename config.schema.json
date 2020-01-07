@@ -35,42 +35,6 @@
 				"required": false,
 				"default": ""
 			},
-			"connection": {
-				"title": "name",
-				"type": "string",
-				"required": false,
-				"default": "Model S Connection"
-			},
-			"charger": {
-				"title": "name",
-				"type": "string",
-				"required": false,
-				"default": "Model S Charger"
-			},
-			"climate": {
-				"title": "name",
-				"type": "string",
-				"required": false,
-				"default": "Model S Climate"
-			},
-			"trunk": {
-				"title": "Trunk",
-				"type": "string",
-				"required": false,
-				"default": "Trunk"
-			},
-			"frunk": {
-				"title": "Front Trunk",
-				"type": "string",
-				"required": false,
-				"default": "Front Trunk"
-			},
-			"chargePort": {
-				"title": "Charge Port",
-				"type": "string",
-				"required": false,
-				"default": "Charge Port"
-			},
 			"waitMinutes": {
 				"title": "Time in minutes to wait for the car to wake up (default is 1 minute)",
 				"type": "integer",
@@ -80,14 +44,6 @@
 				"required": false,
 				"description": "Default is one (1) minute."
 			},
-			"lowBatteryLevel": {
-				"type": "integer",
-				"default": 20,
-				"maximum": 100,
-				"minimum": 0,
-				"required": false,
-				"description": "Threshold at which HomeKit will display the car as being 'Low Battery'."
-			}
 		}
 	}
 }
