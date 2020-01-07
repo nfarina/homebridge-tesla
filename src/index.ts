@@ -31,6 +31,7 @@ class TeslaAccessory {
   vehicleID: string | undefined;
 
   // Services exposed.
+  connectionService: any;
   lockService: any;
   trunkService: any;
   frunkService: any;
@@ -47,6 +48,18 @@ class TeslaAccessory {
     this.password = config["password"];
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
     this.authToken = config["authToken"];
+
+    const connectionService = new Service.Switch(
+      baseName + " Connection",
+      "connection",
+    );
+
+    connectionService
+      .getCharacteristic(Characteristic.On)
+      .on("get", callbackify(this.getConnectionOn))
+      .on("set", callbackify(this.setConnectionOn));
+
+    this.connectionService = connectionService;
 
     const lockService = new Service.LockMechanism(baseName + " Doors", "doors");
 
@@ -127,6 +140,7 @@ class TeslaAccessory {
 
   getServices() {
     return [
+      this.connectionService,
       this.lockService,
       this.climateService,
       this.trunkService,
@@ -194,6 +208,31 @@ class TeslaAccessory {
         Characteristic.LockCurrentState,
         Characteristic.LockCurrentState.UNSECURED,
       );
+    }
+  };
+
+  //
+  // Connection Switch
+  //
+
+  getConnectionOn = async () => {
+    const options = await this.getOptions();
+
+    const { state } = await this.getVehicle();
+    const on = state === "online";
+
+    this.log("Connection on?", on);
+    return on;
+  };
+
+  setConnectionOn = async on => {
+    const options = await this.getOptions();
+
+    if (on) {
+      this.log("Waking up vehicle.");
+      await this.wakeUp();
+    } else {
+      this.log("Ignoring request to put vehicle to sleep, we can't do that!");
     }
   };
 
