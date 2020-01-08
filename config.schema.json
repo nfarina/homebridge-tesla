@@ -43,7 +43,7 @@
 				"minimum": 1,
 				"required": false,
 				"description": "Default is one (1) minute."
-			},
+			}
 		}
 	}
 }
