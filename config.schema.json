@@ -43,6 +43,30 @@
 				"minimum": 1,
 				"required": false,
 				"description": "Default is one (1) minute."
+			},
+			"disableDoors": {
+				"title": "Disable Door Lock Service",
+				"type": "boolean"
+			},
+			"disableClimate": {
+				"title": "Disable Climate Control Service",
+				"type": "boolean"
+			},
+			"disableTrunk": {
+				"title": "Disable Trunk Service",
+				"type": "boolean"
+			},
+			"disableFrunk": {
+				"title": "Disable Frunk Service",
+				"type": "boolean"
+			},
+			"disableCharger": {
+				"title": "Disable Charger Service",
+				"type": "boolean"
+			},
+			"disableStarter": {
+				"title": "Disable Starter Service",
+				"type": "boolean"
 			}
 		}
 	}

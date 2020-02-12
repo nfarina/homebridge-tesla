@@ -26,6 +26,13 @@ class TeslaAccessory {
   password: string | null;
   waitMinutes: number;
   authToken: string | null;
+  disableDoors: boolean | null;
+  disableTrunk: boolean | null;
+  disableFrunk: boolean | null;
+  disableChargePort: boolean | null;
+  disableClimate: boolean | null;
+  disableCharger: boolean | null;
+  disableStarter: boolean | null;
 
   // Runtime state.
   vehicleID: string | undefined;
@@ -35,6 +42,7 @@ class TeslaAccessory {
   lockService: any;
   trunkService: any;
   frunkService: any;
+  chargePortService: any;
   climateService: any;
   chargerService: any;
   starterService: any;
@@ -48,6 +56,13 @@ class TeslaAccessory {
     this.password = config["password"];
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
     this.authToken = config["authToken"];
+    this.disableDoors = config["disableDoors"] || false;
+    this.disableTrunk = config["disableTrunk"] || false;
+    this.disableFrunk = config["disableFrunk"] || false;
+    this.disableChargePort = config["disableChargePort"] || false;
+    this.disableClimate = config["disableClimate"] || false;
+    this.disableCharger = config["disableCharger"] || false;
+    this.disableStarter = config["disableStarter"] || false;
 
     const connectionService = new Service.Switch(
       baseName + " Connection",
@@ -117,6 +132,23 @@ class TeslaAccessory {
 
     this.frunkService = frunkService;
 
+    // Enable the charge port lock service; allows you to open/close the charging port.
+    const chargePortService = new Service.LockMechanism(
+      baseName + " Front Trunk",
+      "frunk",
+    );
+
+    chargePortService
+      .getCharacteristic(Characteristic.LockCurrentState)
+      .on("get", callbackify(this.getChargePortCurrentState));
+
+    chargePortService
+      .getCharacteristic(Characteristic.LockTargetState)
+      .on("get", callbackify(this.getChargePortTargetState))
+      .on("set", callbackify(this.setChargePortTargetState));
+
+    this.chargePortService = chargePortService;
+
     // Enable the charger service; allows you to turn on/off car charging.
     const chargerService = new Service.Switch(baseName + " Charger", "charger");
 
@@ -141,12 +173,12 @@ class TeslaAccessory {
   getServices() {
     return [
       this.connectionService,
-      this.lockService,
-      this.climateService,
-      this.trunkService,
-      this.frunkService,
-      this.chargerService,
-      this.starterService,
+      ...(this.disableDoors ? [] : [this.lockService]),
+      ...(this.disableClimate ? [] : [this.climateService]),
+      ...(this.disableTrunk ? [] : [this.trunkService]),
+      ...(this.disableFrunk ? [] : [this.frunkService]),
+      ...(this.disableCharger ? [] : [this.chargerService]),
+      ...(this.disableStarter ? [] : [this.starterService]),
     ];
   }
 
@@ -216,8 +248,6 @@ class TeslaAccessory {
   //
 
   getConnectionOn = async () => {
-    const options = await this.getOptions();
-
     const { state } = await this.getVehicle();
     const on = state === "online";
 
@@ -226,8 +256,6 @@ class TeslaAccessory {
   };
 
   setConnectionOn = async on => {
-    const options = await this.getOptions();
-
     if (on) {
       this.log("Waking up vehicle.");
       await this.wakeUp();
@@ -385,6 +413,65 @@ class TeslaAccessory {
         Characteristic.LockCurrentState,
         Characteristic.LockCurrentState.UNSECURED,
       );
+  };
+
+  //
+  // Charge Port
+  //
+
+  getChargePortCurrentState = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online.
+    const state: VehicleData = await api("vehicleData", options);
+
+    return state.charge_state.charge_port_door_open
+      ? Characteristic.LockCurrentState.UNSECURED
+      : Characteristic.LockCurrentState.SECURED;
+  };
+
+  getChargePortTargetState = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online.
+    const state: VehicleData = await api("vehicleData", options);
+
+    return state.charge_state.charge_port_door_open
+      ? Characteristic.LockTargetState.UNSECURED
+      : Characteristic.LockTargetState.SECURED;
+  };
+
+  setChargePortTargetState = async state => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    this.log("Set charge port state to", state);
+
+    if (state === Characteristic.LockTargetState.SECURED) {
+      await api("closeChargePort", options);
+    } else {
+      await api("openChargePort", options);
+    }
+
+    // We succeeded, so update the "current" state as well.
+    // We need to update the current state "later" because Siri can't
+    // handle receiving the change event inside the same "set target state"
+    // response.
+    await wait(1);
+
+    if (state == Characteristic.LockTargetState.SECURED) {
+      this.chargePortService.setCharacteristic(
+        Characteristic.LockCurrentState,
+        Characteristic.LockCurrentState.SECURED,
+      );
+    } else {
+      this.chargePortService.setCharacteristic(
+        Characteristic.LockCurrentState,
+        Characteristic.LockCurrentState.UNSECURED,
+      );
+    }
   };
 
   //
