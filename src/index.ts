@@ -178,6 +178,7 @@ class TeslaAccessory {
       ...(this.disableTrunk ? [] : [this.trunkService]),
       ...(this.disableFrunk ? [] : [this.frunkService]),
       ...(this.disableCharger ? [] : [this.chargerService]),
+      ...(this.disableChargePort ? [] : [this.chargePortService]),
       ...(this.disableStarter ? [] : [this.starterService]),
     ];
   }
