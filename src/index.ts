@@ -46,6 +46,7 @@ class TeslaAccessory {
   climateService: any;
   chargerService: any;
   starterService: any;
+  homelinkService: any;
 
   constructor(log, config) {
     const baseName = config["name"];
@@ -168,6 +169,15 @@ class TeslaAccessory {
       .on("set", callbackify(this.setStarterOn));
 
     this.starterService = starterService;
+
+    // Homelink start service lets you open or close a garage door.
+    const homelinkService = new Service.Switch(baseName + " Homelink", "homelink");
+
+    homelinkService
+      .getCharacteristic(Characteristic.On)
+      .on("set", callbackify(this.setHomelinkOn));
+    
+    this.homelinkService = homelinkService;
   }
 
   getServices() {
@@ -634,5 +644,17 @@ class TeslaAccessory {
     throw new Error(
       `Vehicle did not wake up within ${this.waitMinutes} minutes.`,
     );
+  };
+  
+  setHomelinkOn = async () => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    // Send the Homelink command
+    await api("homelink");
+
+    this.log("Homelink command sent");
   };
 }
