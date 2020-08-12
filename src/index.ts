@@ -71,7 +71,7 @@ class TeslaAccessory {
     this.disableClimate = config["disableClimate"] || false;
     this.disableCharger = config["disableCharger"] || false;
     this.disableStarter = config["disableStarter"] || false;
-    this.disableHomelink = config["disableHomelink"] || false;
+    this.enableHomelink = config["enableHomelink"] || false;
     this.disableChargeLevel = config["disableChargeLevel"] || false;
 
     const connectionService = new Service.Switch(
