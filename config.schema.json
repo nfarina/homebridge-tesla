@@ -80,10 +80,10 @@
         "title": "Disable Starter Service",
         "type": "boolean"
       },
-      "disableHomelink": {
-        "title": "Disable Homelink Service",
-        "type": "boolean"
-	"default": true
+      "enableHomelink": {
+        "title": "Enable Homelink Service",
+        "type": "boolean",
+	"default": false
       },
       "disableChargeLevel": {
         "title": "Disable Charge Level Service",
