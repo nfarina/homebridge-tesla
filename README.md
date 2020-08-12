@@ -67,9 +67,9 @@ distinguished by their unique VIN numbers:
       ]
     }
 
-## Homekit
+## Homelink
 
-For vehicles with Homekit support, the plugin allows you to enable the feature to send a Homekit signal from the car. This is disabled by default. To enable the feature, you may use the UI (uncheck the Disable Homelink Service to enable it) or add a setting in the accessory section for the vehicle. You also must provide a latitude and longitude value for the Homekit device.
+For vehicles with Homelink support, the plugin allows you to enable the feature to send a Homekit signal from the car. This is disabled by default. To enable the feature, you may use the UI (check the Enable Homelink Service to enable it) or add a setting in the accessory section for the vehicle. You also must provide a latitude and longitude value for the Homelink device.
 
     {
       "accessories": [
@@ -79,7 +79,7 @@ For vehicles with Homekit support, the plugin allows you to enable the feature t
           "vin": "5JJYCB522AB296261",
           "username": "bobs@burgers.com",
           "password": "bobbobbaran"
-          "disableHomelink": false,
+          "enableHomelink": true,
           "latitude": "37.492655",
           "longitude": "-121.944644"
         }
