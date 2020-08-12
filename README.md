@@ -67,6 +67,31 @@ distinguished by their unique VIN numbers:
       ]
     }
 
+## Homekit
+
+For vehicles with Homekit support, the plugin allows you to enable the feature to send a Homekit signal from the car. This is disabled by default. To enable the feature, you may use the UI (uncheck the Disable Homelink Service to enable it) or add a setting in the accessory section for the vehicle. You also must provide a latitude and longitude value for the Homekit device.
+
+    {
+      "accessories": [
+        {
+          "accessory": "Tesla",
+          "name": "Model 3",
+          "vin": "5JJYCB522AB296261",
+          "username": "bobs@burgers.com",
+          "password": "bobbobbaran"
+          "disableHomelink": false,
+          "latitude": "37.492655",
+          "longitude": "-121.944644"
+        }
+      ]
+    }
+
+## Charge Level
+
+The car will now supply the current charge level of the battery as a percentage. This will only update if the car is awake. The Charge Level can be disabled in either the UI or adding the following to the car's accessory section.
+
+>"disableChargeLevel": true
+
 ## Development
 
 You can run Rollup in watch mode to automatically transpile code as you write it:
