@@ -35,7 +35,7 @@ class TeslaAccessory {
   disableClimate: boolean | null;
   disableCharger: boolean | null;
   disableStarter: boolean | null;
-  disableHomelink: boolean | null;
+  enableHomelink: boolean | null;
   disableChargeLevel: boolean | null;
 
   // Runtime state.
@@ -215,7 +215,7 @@ class TeslaAccessory {
       ...(this.disableCharger ? [] : [this.chargerService]),
       ...(this.disableChargePort ? [] : [this.chargePortService]),
       ...(this.disableStarter ? [] : [this.starterService]),
-      ...(this.disableHomelink ? [] : [this.homelinkService]),
+      ...(this.enableHomelink ? [] : [this.homelinkService]),
       ...(this.disableChargeLevel ? [] : [this.chargeLevelService]),
     ];
   }
