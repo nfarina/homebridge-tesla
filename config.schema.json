@@ -83,7 +83,7 @@
       "enableHomelink": {
         "title": "Enable Homelink Service",
         "type": "boolean",
-	"default": false
+        "default": false
       },
       "disableChargeLevel": {
         "title": "Disable Charge Level Service",
