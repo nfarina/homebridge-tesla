@@ -26,6 +26,8 @@ class TeslaAccessory {
   password: string | null;
   waitMinutes: number;
   authToken: string | null;
+  latitude: number;
+  longitude: number;
   disableDoors: boolean | null;
   disableTrunk: boolean | null;
   disableFrunk: boolean | null;
@@ -33,6 +35,8 @@ class TeslaAccessory {
   disableClimate: boolean | null;
   disableCharger: boolean | null;
   disableStarter: boolean | null;
+  enableHomelink: boolean | null;
+  disableChargeLevel: boolean | null;
 
   // Runtime state.
   vehicleID: string | undefined;
@@ -46,6 +50,8 @@ class TeslaAccessory {
   climateService: any;
   chargerService: any;
   starterService: any;
+  homelinkService: any;
+  chargeLevelService: any;
 
   constructor(log, config) {
     const baseName = config["name"];
@@ -56,6 +62,8 @@ class TeslaAccessory {
     this.password = config["password"];
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
     this.authToken = config["authToken"];
+    this.latitude = config["latitude"];
+    this.longitude = config["longitude"];
     this.disableDoors = config["disableDoors"] || false;
     this.disableTrunk = config["disableTrunk"] || false;
     this.disableFrunk = config["disableFrunk"] || false;
@@ -63,6 +71,8 @@ class TeslaAccessory {
     this.disableClimate = config["disableClimate"] || false;
     this.disableCharger = config["disableCharger"] || false;
     this.disableStarter = config["disableStarter"] || false;
+    this.enableHomelink = config["enableHomelink"] || false;
+    this.disableChargeLevel = config["disableChargeLevel"] || false;
 
     const connectionService = new Service.Switch(
       baseName + " Connection",
@@ -168,6 +178,31 @@ class TeslaAccessory {
       .on("set", callbackify(this.setStarterOn));
 
     this.starterService = starterService;
+
+    // Homelink start service lets you open or close a garage door.
+    const homelinkService = new Service.GarageDoorOpener(
+      baseName + " Homelink",
+      "homelink",
+    );
+
+    homelinkService
+      .getCharacteristic(Characteristic.TargetDoorState)
+      .on("get", callbackify(this.getCurrentGarageDoorState))
+      .on("set", callbackify(this.setTargetGarageDoorState));
+
+    this.homelinkService = homelinkService;
+
+    // Charge Level
+    const chargeLevelService = new Service.BatteryService(
+      baseName + " Charge Level",
+      "Charge Level",
+    );
+
+    chargeLevelService
+      .getCharacteristic(Characteristic.BatteryLevel)
+      .on("get", callbackify(this.getCurrentChargeLevel));
+
+    this.chargeLevelService = chargeLevelService;
   }
 
   getServices() {
@@ -180,8 +215,50 @@ class TeslaAccessory {
       ...(this.disableCharger ? [] : [this.chargerService]),
       ...(this.disableChargePort ? [] : [this.chargePortService]),
       ...(this.disableStarter ? [] : [this.starterService]),
+      ...(this.enableHomelink ? [] : [this.homelinkService]),
+      ...(this.disableChargeLevel ? [] : [this.chargeLevelService]),
     ];
   }
+
+  //
+  //Homelink
+  //
+
+  getCurrentGarageDoorState = async () => {
+    this.log("Homelink does not support garage door status.");
+    return;
+  };
+
+  setTargetGarageDoorState = async () => {
+    const options = await this.getOptions();
+    const state: VehicleState = await api("vehicleState", options);
+
+    // Car has to be awake
+    await this.wakeUp();
+
+    // This will only succeed if the car is already online and within proximity to the
+    // latitude and longitude settings.
+    if (state.homelink_nearby) {
+      const results = await api(
+        "homelink",
+        options,
+        this.latitude,
+        this.longitude,
+      );
+      this.log("Homelink activated: ", results.result);
+    } else this.log("Homelink not available.");
+  };
+
+  //
+  // Charge Level
+  //
+
+  getCurrentChargeLevel = async () => {
+    const options = await this.getOptions();
+    const chargelevel = await api("chargeState", options);
+
+    return chargelevel.battery_level;
+  };
 
   //
   // Vehicle Lock
@@ -624,7 +701,7 @@ class TeslaAccessory {
         return;
       }
 
-      this.log("Waiting for vehicle to wake up…");
+      this.log("Waiting for vehicle to wake up...");
       await wait(waitTime);
 
       // Use exponential backoff with a max wait of 5 seconds.

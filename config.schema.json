@@ -1,73 +1,94 @@
 {
-	"pluginAlias": "Tesla",
-	"pluginType": "accessory",
-	"schema": {
-		"type": "object",
-		"properties": {
-			"name": {
-				"title": "name",
-				"type": "string",
-				"required": true,
-				"default": "Model S"
-			},
-			"vin": {
-				"title": "VIN",
-				"type": "string",
-				"required": true,
-				"default": ""
-			},
-			"authToken": {
-				"title": "Tesla authentication token (not required when using username/password)",
-				"type": "string",
-				"required": false,
-				"default": "",
-				"description": "Read the <a href='https://github.com/nfarina/homebridge-tesla'>documentation</a> to learn how to create a token."
-			},
-			"username": {
-				"title": "Tesla username (not required when using authentication token)",
-				"type": "string",
-				"required": false,
-				"default": ""
-			},
-			"password": {
-				"title": "Tesla password (not required when using authentication token)",
-				"type": "string",
-				"required": false,
-				"default": ""
-			},
-			"waitMinutes": {
-				"title": "Time in minutes to wait for the car to wake up (default is 1 minute)",
-				"type": "integer",
-				"default": 1,
-				"maximum": 10,
-				"minimum": 1,
-				"required": false,
-				"description": "Default is one (1) minute."
-			},
-			"disableDoors": {
-				"title": "Disable Door Lock Service",
-				"type": "boolean"
-			},
-			"disableClimate": {
-				"title": "Disable Climate Control Service",
-				"type": "boolean"
-			},
-			"disableTrunk": {
-				"title": "Disable Trunk Service",
-				"type": "boolean"
-			},
-			"disableFrunk": {
-				"title": "Disable Frunk Service",
-				"type": "boolean"
-			},
-			"disableCharger": {
-				"title": "Disable Charger Service",
-				"type": "boolean"
-			},
-			"disableStarter": {
-				"title": "Disable Starter Service",
-				"type": "boolean"
-			}
-		}
-	}
+  "pluginAlias": "Tesla",
+  "pluginType": "accessory",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "name",
+        "type": "string",
+        "required": true,
+        "default": "Model S"
+      },
+      "vin": {
+        "title": "VIN",
+        "type": "string",
+        "required": true,
+        "default": ""
+      },
+      "authToken": {
+        "title": "Tesla authentication token (not required when using username/password)",
+        "type": "string",
+        "required": false,
+        "default": "",
+        "description": "Read the <a href='https://github.com/nfarina/homebridge-tesla'>documentation</a> to learn how to create a token."
+      },
+      "username": {
+        "title": "Tesla username (not required when using authentication token)",
+        "type": "string",
+        "required": false,
+        "default": ""
+      },
+      "password": {
+        "title": "Tesla password (not required when using authentication token)",
+        "type": "string",
+        "required": false,
+        "default": ""
+      },
+      "waitMinutes": {
+        "title": "Time in minutes to wait for the car to wake up (default is 1 minute)",
+        "type": "integer",
+        "default": 1,
+        "maximum": 10,
+        "minimum": 1,
+        "required": false,
+        "description": "Default is one (1) minute."
+      },
+      "latitude": {
+        "title": "Latitude of Homelink device",
+        "type": "string",
+        "required": false,
+        "description": "This is the latitude position of your Homelink device."
+      },
+      "longitude": {
+        "title": "Longitude of Homelink device",
+        "type": "string",
+        "required": false,
+        "description": "This is the longitude position of your Homelink device."
+      },
+      "disableDoors": {
+        "title": "Disable Door Lock Service",
+        "type": "boolean"
+      },
+      "disableClimate": {
+        "title": "Disable Climate Control Service",
+        "type": "boolean"
+      },
+      "disableTrunk": {
+        "title": "Disable Trunk Service",
+        "type": "boolean"
+      },
+      "disableFrunk": {
+        "title": "Disable Frunk Service",
+        "type": "boolean"
+      },
+      "disableCharger": {
+        "title": "Disable Charger Service",
+        "type": "boolean"
+      },
+      "disableStarter": {
+        "title": "Disable Starter Service",
+        "type": "boolean"
+      },
+      "enableHomelink": {
+        "title": "Enable Homelink Service",
+        "type": "boolean",
+        "default": false
+      },
+      "disableChargeLevel": {
+        "title": "Disable Charge Level Service",
+        "type": "boolean"
+      }
+    }
+  }
 }
