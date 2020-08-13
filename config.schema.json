@@ -45,16 +45,16 @@
         "description": "Default is one (1) minute."
       },
       "latitude": {
-        "title": "Latitude of Homelink device",
+        "title": "Latitude of HomeLink device",
         "type": "string",
         "required": false,
-        "description": "This is the latitude position of your Homelink device."
+        "description": "This is the latitude position of your HomeLink device."
       },
       "longitude": {
-        "title": "Longitude of Homelink device",
+        "title": "Longitude of HomeLink device",
         "type": "string",
         "required": false,
-        "description": "This is the longitude position of your Homelink device."
+        "description": "This is the longitude position of your HomeLink device."
       },
       "disableDoors": {
         "title": "Disable Door Lock Service",
@@ -80,10 +80,9 @@
         "title": "Disable Starter Service",
         "type": "boolean"
       },
-      "enableHomelink": {
-        "title": "Enable Homelink Service",
-        "type": "boolean",
-        "default": false
+      "enableHomeLink": {
+        "title": "Enable HomeLink Service",
+        "type": "boolean"
       },
       "disableChargeLevel": {
         "title": "Disable Charge Level Service",

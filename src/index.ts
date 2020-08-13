@@ -35,7 +35,7 @@ class TeslaAccessory {
   disableClimate: boolean | null;
   disableCharger: boolean | null;
   disableStarter: boolean | null;
-  enableHomelink: boolean | null;
+  enableHomeLink: boolean | null;
   disableChargeLevel: boolean | null;
 
   // Runtime state.
@@ -71,7 +71,7 @@ class TeslaAccessory {
     this.disableClimate = config["disableClimate"] || false;
     this.disableCharger = config["disableCharger"] || false;
     this.disableStarter = config["disableStarter"] || false;
-    this.enableHomelink = config["enableHomelink"] || false;
+    this.enableHomeLink = config["enableHomeLink"] || false;
     this.disableChargeLevel = config["disableChargeLevel"] || false;
 
     const connectionService = new Service.Switch(
@@ -179,9 +179,9 @@ class TeslaAccessory {
 
     this.starterService = starterService;
 
-    // Homelink start service lets you open or close a garage door.
+    // HomeLink start service lets you open or close a garage door.
     const homelinkService = new Service.GarageDoorOpener(
-      baseName + " Homelink",
+      baseName + " HomeLink",
       "homelink",
     );
 
@@ -215,17 +215,17 @@ class TeslaAccessory {
       ...(this.disableCharger ? [] : [this.chargerService]),
       ...(this.disableChargePort ? [] : [this.chargePortService]),
       ...(this.disableStarter ? [] : [this.starterService]),
-      ...(this.enableHomelink ? [] : [this.homelinkService]),
+      ...(this.enableHomeLink ? [] : [this.homelinkService]),
       ...(this.disableChargeLevel ? [] : [this.chargeLevelService]),
     ];
   }
 
   //
-  //Homelink
+  //HomeLink
   //
 
   getCurrentGarageDoorState = async () => {
-    this.log("Homelink does not support garage door status.");
+    this.log("HomeLink does not support garage door status.");
     return;
   };
 
@@ -245,8 +245,8 @@ class TeslaAccessory {
         this.latitude,
         this.longitude,
       );
-      this.log("Homelink activated: ", results.result);
-    } else this.log("Homelink not available.");
+      this.log("HomeLink activated: ", results.result);
+    } else this.log("HomeLink not available.");
   };
 
   //

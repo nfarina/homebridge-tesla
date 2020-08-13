@@ -67,9 +67,11 @@ distinguished by their unique VIN numbers:
       ]
     }
 
-## Homelink
+## HomeLink
 
-For vehicles with Homelink support, the plugin allows you to enable the feature to send a Homelink signal from the car. This is disabled by default. To enable the feature, you may use the UI (check the Enable Homelink Service to enable it) or add a setting in the accessory section for the vehicle. You also must provide a latitude and longitude value for the Homelink device.
+For vehicles with HomeLink support, the plugin allows you to enable the feature to send a HomeLink signal from the car. This is disabled by default. To enable the feature, you may use the UI (check the Enable HomeLink Service to enable it) or add a setting in the accessory section for the vehicle. You also must provide a latitude and longitude value for the HomeLink device.
+
+Once that is done, you can issue commands like "Open the Model 3 HomeLink". If you don't have any other garage doors in HomeKit, you may also be able to just say "Open the garage door" since it's exposed as a true garage door service.
 
     {
       "accessories": [
@@ -79,7 +81,7 @@ For vehicles with Homelink support, the plugin allows you to enable the feature 
           "vin": "5JJYCB522AB296261",
           "username": "bobs@burgers.com",
           "password": "bobbobbaran"
-          "enableHomelink": true,
+          "enableHomeLink": true,
           "latitude": "37.492655",
           "longitude": "-121.944644"
         }
@@ -88,9 +90,11 @@ For vehicles with Homelink support, the plugin allows you to enable the feature 
 
 ## Charge Level
 
-The car will now supply the current charge level of the battery as a percentage. This will only update if the car is awake. The Charge Level can be disabled in either the UI or adding the following to the car's accessory section.
+The car can supply the current charge level of the battery as a percentage. This will only update if the car is awake. Asking Siri about your car's charge level will not wake up the car (because Siri asks a lot in the background). So you'll have to issue a write command like "Turn on the Model 3 Connection" first.
 
->"disableChargeLevel": true
+The Charge Level can be disabled in either your Homebridge UI or by adding the following to the car's accessory section.
+
+> "disableChargeLevel": true
 
 ## Development
 
