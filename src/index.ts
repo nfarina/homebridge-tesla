@@ -215,7 +215,7 @@ class TeslaAccessory {
       ...(this.disableCharger ? [] : [this.chargerService]),
       ...(this.disableChargePort ? [] : [this.chargePortService]),
       ...(this.disableStarter ? [] : [this.starterService]),
-      ...(this.enableHomeLink ? [] : [this.homelinkService]),
+      ...(!this.enableHomeLink ? [] : [this.homelinkService]),
       ...(this.disableChargeLevel ? [] : [this.chargeLevelService]),
     ];
   }
