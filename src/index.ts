@@ -236,7 +236,6 @@ class TeslaAccessory {
     }
     
     return;
-
   };
 
   setTargetGarageDoorState = async () => {
