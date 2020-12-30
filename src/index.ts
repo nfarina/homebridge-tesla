@@ -234,6 +234,8 @@ class TeslaAccessory {
         Characteristic.TargetDoorState.CLOSED,
       );
     }
+    
+    return;
 
   };
 
@@ -254,9 +256,7 @@ class TeslaAccessory {
         this.longitude,
       );
       this.log("HomeLink activated: ", results.result);
-
     } else this.log("HomeLink not available.");
-    
   };
 
   //
