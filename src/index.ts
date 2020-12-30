@@ -226,7 +226,6 @@ class TeslaAccessory {
 
   getCurrentGarageDoorState = async () => {
     this.log("HomeLink does not support garage door status.");
-    return;
   };
 
   setTargetGarageDoorState = async () => {
@@ -246,7 +245,13 @@ class TeslaAccessory {
         this.longitude,
       );
       this.log("HomeLink activated: ", results.result);
+
     } else this.log("HomeLink not available.");
+    
+    this.log("HomeLink does not support garage door status.");
+    this.log("Always setting garage door state to closed.");
+    const doorState = 1;
+    return doorState;
   };
 
   //
