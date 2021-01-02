@@ -645,19 +645,26 @@ class TeslaAccessory {
   };
 
   getAuthToken = async (): Promise<string> => {
-    const { username, password, authToken } = this;
+    // Use a mutex to prevent multiple logins happening in parallel.
+    const unlock = await lock("getAuthToken", 20000);
 
-    // Return cached value if we have one.
-    if (authToken) return authToken;
+    try {
+      const { username, password, authToken } = this;
 
-    this.log("Logging into Tesla with username/password…");
-    const result = await api("login", username, password);
-    const token = result.authToken;
+      // Return cached value if we have one.
+      if (authToken) return authToken;
 
-    // Save it in memory for future API calls.
-    this.log("Got a login token.");
-    this.authToken = token;
-    return token;
+      this.log("Logging into Tesla with username/password…");
+      const result = await api("login", username, password);
+      const token = result.authToken;
+
+      // Save it in memory for future API calls.
+      this.log("Got a login token.");
+      this.authToken = token;
+      return token;
+    } finally {
+      unlock();
+    }
   };
 
   getVehicle = async () => {
