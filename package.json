@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tesla",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Tesla support for Homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -24,7 +24,7 @@
   ],
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
-    "teslajs": "^4.8.1"
+    "teslajs": "^4.9.4"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
