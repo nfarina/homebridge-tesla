@@ -44,7 +44,7 @@ You may disable various services using additional boolean configuration settings
 
 ## Multiple Vehicles
 
-Have a garage full of Teslas? Well you're in luck Mr. Musk, becuase you can
+Have a garage full of Teslas? Well you're in luck Mr. Musk, because you can
 easily add all of them to HomeKit by creating a separate accessory for each one
 distinguished by their unique VIN numbers:
 
