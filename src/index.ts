@@ -29,6 +29,7 @@ class TeslaAccessory {
   latitude: number;
   longitude: number;
   disableDoors: boolean | null;
+  disableSentryMode: boolean | null;
   disableTrunk: boolean | null;
   disableFrunk: boolean | null;
   disableChargePort: boolean | null;
@@ -44,6 +45,7 @@ class TeslaAccessory {
   // Services exposed.
   connectionService: any;
   lockService: any;
+  sentryModeService: any;
   trunkService: any;
   frunkService: any;
   chargePortService: any;
@@ -65,6 +67,7 @@ class TeslaAccessory {
     this.latitude = config["latitude"];
     this.longitude = config["longitude"];
     this.disableDoors = config["disableDoors"] || false;
+    this.disableSentryMode = config["disableSentryMode"] || false;
     this.disableTrunk = config["disableTrunk"] || false;
     this.disableFrunk = config["disableFrunk"] || false;
     this.disableChargePort = config["disableChargePort"] || false;
@@ -98,6 +101,19 @@ class TeslaAccessory {
       .on("set", callbackify(this.setLockTargetState));
 
     this.lockService = lockService;
+
+    const sentryModeService = new Service.LockMechanism(baseName + " Sentry Mode", "sentry");
+
+    sentryModeService
+      .getCharacteristic(Characteristic.LockCurrentState)
+      .on("get", callbackify(this.getSentryModeCurrentState));
+
+    sentryModeService
+      .getCharacteristic(Characteristic.LockTargetState)
+      .on("get", callbackify(this.getSentryModeTargetState))
+      .on("set", callbackify(this.setSentryModeTargetState));
+
+    this.sentryModeService = sentryModeService;
 
     const climateService = new Service.Switch(baseName + " Climate", "climate");
 
@@ -209,6 +225,7 @@ class TeslaAccessory {
     return [
       this.connectionService,
       ...(this.disableDoors ? [] : [this.lockService]),
+      ...(this.disableSentryMode ? [] : [this.sentryModeService]),
       ...(this.disableClimate ? [] : [this.climateService]),
       ...(this.disableTrunk ? [] : [this.trunkService]),
       ...(this.disableFrunk ? [] : [this.frunkService]),
@@ -270,6 +287,67 @@ class TeslaAccessory {
   };
 
   //
+  // Sentry Mode
+  //
+
+  getSentryModeCurrentState = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see the sentry mode state because that could drain battery!
+    const state: VehicleState = await api("vehicleState", options);
+
+    return state.sentry_mode
+      ? Characteristic.LockCurrentState.SECURED
+      : Characteristic.LockCurrentState.UNSECURED;
+  };
+
+  getSentryModeTargetState = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see the sentry mode state because that could drain battery!
+    const state: VehicleState = await api("vehicleState", options);
+
+    return state.sentry_mode
+      ? Characteristic.LockTargetState.SECURED
+      : Characteristic.LockTargetState.UNSECURED;
+  };
+
+  setSentryModeTargetState = async state => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    this.log("Set sentry mode state to", state);
+
+    if (state === Characteristic.LockTargetState.SECURED) {
+      await api("setSentryMode", options, true);
+    } else {
+      await api("setSentryMode", options, false);
+    }
+
+    // We succeeded, so update the "current" state as well.
+    // We need to update the current state "later" because Siri can't
+    // handle receiving the change event inside the same "set target state"
+    // response.
+    await wait(1);
+
+    if (state == Characteristic.LockTargetState.SECURED) {
+      this.sentryModeService.setCharacteristic(
+        Characteristic.LockCurrentState,
+        Characteristic.LockCurrentState.SECURED,
+      );
+    } else {
+      this.sentryModeService.setCharacteristic(
+        Characteristic.LockCurrentState,
+        Characteristic.LockCurrentState.UNSECURED,
+      );
+    }
+  };
+
+  //
   // Vehicle Lock
   //
 
@@ -277,7 +355,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // wake it up just to see the lock state because that could drain battery!
     const state: VehicleState = await api("vehicleState", options);
 
     return state.locked
@@ -289,7 +367,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
+    // wake it up just to see the lock state because that could drain battery!
     const state: VehicleState = await api("vehicleState", options);
 
     return state.locked
