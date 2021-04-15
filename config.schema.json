@@ -60,6 +60,10 @@
         "title": "Disable Door Lock Service",
         "type": "boolean"
       },
+      "disableSentryMode": {
+        "title": "Disable Sentry Mode Service",
+        "type": "boolean"
+      },
       "disableClimate": {
         "title": "Disable Climate Control Service",
         "type": "boolean"

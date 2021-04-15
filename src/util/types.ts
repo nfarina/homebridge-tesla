@@ -56,6 +56,7 @@ export interface VehicleState {
   remote_start: boolean;
   remote_start_supported: boolean;
   rt: number;
+  sentry_mode: boolean;
   software_update: {
     expected_duration_sec: number;
     status: string;
