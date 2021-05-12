@@ -30,6 +30,7 @@ class TeslaAccessory {
   longitude: number;
   disableDoors: boolean | null;
   disableSentryMode: boolean | null;
+  sentryModeSwitch: boolean | null;
   disableTrunk: boolean | null;
   disableFrunk: boolean | null;
   disableChargePort: boolean | null;
@@ -68,6 +69,7 @@ class TeslaAccessory {
     this.longitude = config["longitude"];
     this.disableDoors = config["disableDoors"] || false;
     this.disableSentryMode = config["disableSentryMode"] || false;
+    this.sentryModeSwitch = config["sentryModeSwitch"] || false;
     this.disableTrunk = config["disableTrunk"] || false;
     this.disableFrunk = config["disableFrunk"] || false;
     this.disableChargePort = config["disableChargePort"] || false;
@@ -102,18 +104,33 @@ class TeslaAccessory {
 
     this.lockService = lockService;
 
-    const sentryModeService = new Service.LockMechanism(baseName + " Sentry Mode", "sentry");
+    const sentryModeLockService = new Service.LockMechanism(
+      baseName + " Sentry Mode",
+      "sentry",
+    );
 
-    sentryModeService
+    sentryModeLockService
       .getCharacteristic(Characteristic.LockCurrentState)
       .on("get", callbackify(this.getSentryModeCurrentState));
 
-    sentryModeService
+    sentryModeLockService
       .getCharacteristic(Characteristic.LockTargetState)
       .on("get", callbackify(this.getSentryModeTargetState))
       .on("set", callbackify(this.setSentryModeTargetState));
 
-    this.sentryModeService = sentryModeService;
+    const sentryModeSwitchService = new Service.Switch(
+      baseName + " Sentry Mode",
+      "sentrySwitch",
+    );
+
+    sentryModeSwitchService
+      .getCharacteristic(Characteristic.On)
+      .on("get", callbackify(this.getSentryModeOn))
+      .on("set", callbackify(this.setSentryModeOn));
+
+    this.sentryModeService = this.sentryModeSwitch
+      ? sentryModeSwitchService
+      : sentryModeLockService;
 
     const climateService = new Service.Switch(baseName + " Climate", "climate");
 
@@ -251,7 +268,7 @@ class TeslaAccessory {
         Characteristic.TargetDoorState.CLOSED,
       );
     }
-    
+
     return;
   };
 
@@ -344,6 +361,34 @@ class TeslaAccessory {
         Characteristic.LockCurrentState,
         Characteristic.LockCurrentState.UNSECURED,
       );
+    }
+  };
+
+  getSentryModeOn = async () => {
+    const options = await this.getOptions();
+
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see the sentry mode state because that could drain battery!
+    const state: VehicleState = await api("vehicleState", options);
+
+    const on = state.sentry_mode;
+
+    this.log("Sentry Mode on?", on);
+    return on;
+  };
+
+  setSentryModeOn = async (on: boolean) => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp();
+
+    this.log("Set sentry mode state to", on);
+
+    if (on) {
+      await api("setSentryMode", options, true);
+    } else {
+      await api("setSentryMode", options, false);
     }
   };
 
