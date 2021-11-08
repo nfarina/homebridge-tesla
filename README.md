@@ -39,6 +39,8 @@ Tesla has recently (early 2021) updated their OAuth authentication system as par
 
 Once you get a refresh token using an app (it's very long), you can paste it into your plugin configuration above.
 
+**NOTE** This plugin used to accept an `authToken` property which was intended to be an optional refresh token. If you have one already, you can just paste that token in the `refreshToken` property. The `authToken` property is no longer used, since the name `refreshToken` is more accurate and sets the token apart from OAuth "access tokens" which are only good for 8 hours.
+
 ## Multiple Vehicles
 
 Have a garage full of Teslas? Well you're in luck Mr. Musk, because you can
