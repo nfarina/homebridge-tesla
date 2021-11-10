@@ -24,6 +24,7 @@ class TeslaAccessory {
   name: string;
   vin: string;
   refreshToken: string;
+  password: string;
   waitMinutes: number;
   latitude: number;
   longitude: number;
@@ -65,6 +66,7 @@ class TeslaAccessory {
     this.vin = config["vin"];
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
     this.refreshToken = config["refreshToken"];
+    this.password = config["password"];
     this.latitude = config["latitude"];
     this.longitude = config["longitude"];
     this.disableDoors = config["disableDoors"] || false;
@@ -203,15 +205,14 @@ class TeslaAccessory {
     this.chargerService = chargerService;
 
     // Remote start service lets you initiate keyless driving.
-    // Disabled since we aren't collecting your Tesla password anymore.
-    // const starterService = new Service.Switch(baseName + " Starter", "starter");
+    const starterService = new Service.Switch(baseName + " Starter", "starter");
 
-    // starterService
-    //   .getCharacteristic(Characteristic.On)
-    //   .on("get", callbackify(this.getStarterOn))
-    //   .on("set", callbackify(this.setStarterOn));
+    starterService
+      .getCharacteristic(Characteristic.On)
+      .on("get", callbackify(this.getStarterOn))
+      .on("set", callbackify(this.setStarterOn));
 
-    // this.starterService = starterService;
+    this.starterService = starterService;
 
     // HomeLink start service lets you open or close a garage door.
     const homelinkService = new Service.GarageDoorOpener(
@@ -249,7 +250,7 @@ class TeslaAccessory {
       ...(this.disableFrunk ? [] : [this.frunkService]),
       ...(this.disableCharger ? [] : [this.chargerService]),
       ...(this.disableChargePort ? [] : [this.chargePortService]),
-      // ...(this.disableStarter ? [] : [this.starterService]),
+      ...(this.disableStarter ? [] : [this.starterService]),
       ...(!this.enableHomeLink ? [] : [this.homelinkService]),
       ...(this.disableChargeLevel ? [] : [this.chargeLevelService]),
     ];
@@ -720,32 +721,32 @@ class TeslaAccessory {
   // Starter Switch (Remote start)
   //
 
-  // getStarterOn = async () => {
-  //   const options = await this.getOptions();
+  getStarterOn = async () => {
+    const options = await this.getOptions();
 
-  //   // This will only succeed if the car is already online.
-  //   const state: VehicleData = await api("vehicleData", options);
+    // This will only succeed if the car is already online.
+    const state: VehicleData = await api("vehicleData", options);
 
-  //   const on = !!state.vehicle_state.remote_start;
+    const on = !!state.vehicle_state.remote_start;
 
-  //   this.log("Remote start active?", on);
-  //   return on;
-  // };
+    this.log("Remote start active?", on);
+    return on;
+  };
 
-  // setStarterOn = async (on: boolean) => {
-  //   const options = await this.getOptions();
+  setStarterOn = async (on: boolean) => {
+    const options = await this.getOptions();
 
-  //   // Wake up, this is important!
-  //   await this.wakeUp();
+    // Wake up, this is important!
+    await this.wakeUp();
 
-  //   this.log("Set remote starter to", on);
+    this.log("Set remote starter to", on);
 
-  //   if (on) {
-  //     await tesla.remoteStartAsync(options, this.password);
-  //   } else {
-  //     throw new Error("Cannot turn off the remote starter.");
-  //   }
-  // };
+    if (on) {
+      await tesla.remoteStartAsync(options, this.password);
+    } else {
+      throw new Error("Cannot turn off the remote starter.");
+    }
+  };
 
   //
   // General

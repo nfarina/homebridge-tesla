@@ -9,12 +9,15 @@ Example config.json:
           "name": "Model 3",
           "vin": "5JJYCB522AB296261",
           "refreshToken": "eyJhbGciOiJSUzI1…",
+          "password": "<optional, only needed for keyless driving>",
           "waitMinutes": 1
         }
       ]
     }
 
-Exposes lock services for doors, trunk, and front trunk. Also exposes an on/off switch for climate control, charge state, and keyless driving.
+Exposes lock services for doors, trunk, and front trunk. Also exposes an on/off switch for climate control, and charge state.
+
+_If_ you define a value for `password`, you can also enable keyless driving by turning on the "starter" switch.
 
 _If_ you define a value for `waitMinutes`, you can control the amount of
 time the plugin will wait for the car to wake up. The default is one minute.
@@ -26,8 +29,10 @@ If you use the example above, you would gain Siri commands like:
 - _"Open the Model 3 Front Trunk"_ (pop the frunk)
 - _"Open the Model 3 Charge Port"_ (open the charging port)
 - _"Turn on the Model 3 Climate"_ (turn on climate control)
+- _"Turn on the Model 3 Sentry Mode"_ (turn on sentry mode)
 - _"Turn on the Model 3 Charger"_ (begin charging even if outside your schedule)
 - _"Turn on the Model 3 Connection"_ (wake the car up so you can ask if it's locked, etc.)
+- _"Turn on the Model 3 Starter"_ (enable keyless driving, requires password)
 
 **Important Note**: The Home app will allow you to customize the default names of these services. You may be tempted to, for instance, change your "Model 3 Front Trunk" service to just "Front Trunk" so you can say "Open the Front Trunk". Don't do this! The names of these services are essentially _global_ and live in a giant pool of names. Siri will get confused unless every service has an easily distinguished name.
 

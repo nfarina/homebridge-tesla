@@ -16,21 +16,15 @@
         "required": true,
         "default": ""
       },
-      "authToken": {
-        "title": "Tesla authentication token (not required when using username/password)",
+      "refreshToken": {
+        "title": "Tesla API Refresh Token",
         "type": "string",
-        "required": false,
+        "required": true,
         "default": "",
-        "description": "Read the <a href='https://github.com/nfarina/homebridge-tesla'>documentation</a> to learn how to create a token."
-      },
-      "username": {
-        "title": "Tesla username (not required when using authentication token)",
-        "type": "string",
-        "required": false,
-        "default": ""
+        "description": "Read the <a href='https://github.com/nfarina/homebridge-tesla'>documentation</a> to learn how to get a refresh token."
       },
       "password": {
-        "title": "Tesla password (not required when using authentication token)",
+        "title": "Tesla password (only required for keyless driving)",
         "type": "string",
         "required": false,
         "default": ""
