@@ -64,6 +64,11 @@
         "title": "Disable Sentry Mode Service",
         "type": "boolean"
       },
+      "sentryModeSwitch": {
+        "title": "Sentry Mode Service as a Switch",
+        "type": "boolean",
+        "description": "This will configure Sentry Mode as a switch, instead of a lock."
+      },
       "disableClimate": {
         "title": "Disable Climate Control Service",
         "type": "boolean"
