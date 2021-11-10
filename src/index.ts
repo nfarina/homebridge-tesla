@@ -1,16 +1,17 @@
 require("@babel/polyfill");
-import { ClimateState, Vehicle, VehicleState, VehicleData } from "./util/types";
-import { wait } from "./util/wait";
 import api from "./util/api";
-import { lock } from "./util/mutex";
 import callbackify from "./util/callbackify";
+import { lock } from "./util/mutex";
+import { getAccessToken } from "./util/token";
+import { ClimateState, Vehicle, VehicleData, VehicleState } from "./util/types";
+import { wait } from "./util/wait";
 
 const util = require("util");
 const tesla = require("teslajs");
 
 let Service: any, Characteristic: any;
 
-export default function(homebridge: any) {
+export default function (homebridge: any) {
   Service = homebridge.hap.Service;
   Characteristic = homebridge.hap.Characteristic;
 
@@ -22,10 +23,8 @@ class TeslaAccessory {
   log: Function;
   name: string;
   vin: string;
-  username: string | null;
-  password: string | null;
+  refreshToken: string;
   waitMinutes: number;
-  authToken: string | null;
   latitude: number;
   longitude: number;
   disableDoors: boolean | null;
@@ -42,6 +41,9 @@ class TeslaAccessory {
 
   // Runtime state.
   vehicleID: string | undefined;
+  authToken: string | undefined;
+  authTokenExpires: number | undefined;
+  authTokenError: Error | undefined;
 
   // Services exposed.
   connectionService: any;
@@ -61,10 +63,8 @@ class TeslaAccessory {
     this.log = log;
     this.name = baseName + " Vehicle";
     this.vin = config["vin"];
-    this.username = config["username"];
-    this.password = config["password"];
     this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
-    this.authToken = config["authToken"];
+    this.refreshToken = config["refreshToken"];
     this.latitude = config["latitude"];
     this.longitude = config["longitude"];
     this.disableDoors = config["disableDoors"] || false;
@@ -203,14 +203,15 @@ class TeslaAccessory {
     this.chargerService = chargerService;
 
     // Remote start service lets you initiate keyless driving.
-    const starterService = new Service.Switch(baseName + " Starter", "starter");
+    // Disabled since we aren't collecting your Tesla password anymore.
+    // const starterService = new Service.Switch(baseName + " Starter", "starter");
 
-    starterService
-      .getCharacteristic(Characteristic.On)
-      .on("get", callbackify(this.getStarterOn))
-      .on("set", callbackify(this.setStarterOn));
+    // starterService
+    //   .getCharacteristic(Characteristic.On)
+    //   .on("get", callbackify(this.getStarterOn))
+    //   .on("set", callbackify(this.setStarterOn));
 
-    this.starterService = starterService;
+    // this.starterService = starterService;
 
     // HomeLink start service lets you open or close a garage door.
     const homelinkService = new Service.GarageDoorOpener(
@@ -248,7 +249,7 @@ class TeslaAccessory {
       ...(this.disableFrunk ? [] : [this.frunkService]),
       ...(this.disableCharger ? [] : [this.chargerService]),
       ...(this.disableChargePort ? [] : [this.chargePortService]),
-      ...(this.disableStarter ? [] : [this.starterService]),
+      // ...(this.disableStarter ? [] : [this.starterService]),
       ...(!this.enableHomeLink ? [] : [this.homelinkService]),
       ...(this.disableChargeLevel ? [] : [this.chargeLevelService]),
     ];
@@ -331,7 +332,7 @@ class TeslaAccessory {
       : Characteristic.LockTargetState.UNSECURED;
   };
 
-  setSentryModeTargetState = async state => {
+  setSentryModeTargetState = async (state) => {
     const options = await this.getOptions();
 
     // Wake up, this is important!
@@ -420,7 +421,7 @@ class TeslaAccessory {
       : Characteristic.LockTargetState.UNSECURED;
   };
 
-  setLockTargetState = async state => {
+  setLockTargetState = async (state) => {
     const options = await this.getOptions();
 
     // Wake up, this is important!
@@ -465,7 +466,7 @@ class TeslaAccessory {
     return on;
   };
 
-  setConnectionOn = async on => {
+  setConnectionOn = async (on) => {
     if (on) {
       this.log("Waking up vehicle.");
       await this.wakeUp();
@@ -491,7 +492,7 @@ class TeslaAccessory {
     return on;
   };
 
-  setClimateOn = async on => {
+  setClimateOn = async (on) => {
     const options = await this.getOptions();
 
     // Wake up, this is important!
@@ -534,7 +535,7 @@ class TeslaAccessory {
       : Characteristic.LockTargetState.SECURED;
   };
 
-  setTrunkTargetState = async state => {
+  setTrunkTargetState = async (state) => {
     const options = await this.getOptions();
 
     // Wake up, this is important!
@@ -596,7 +597,7 @@ class TeslaAccessory {
       : Characteristic.LockTargetState.SECURED;
   };
 
-  setFrunkTargetState = async state => {
+  setFrunkTargetState = async (state) => {
     const options = await this.getOptions();
 
     // Wake up, this is important!
@@ -651,7 +652,7 @@ class TeslaAccessory {
       : Characteristic.LockTargetState.SECURED;
   };
 
-  setChargePortTargetState = async state => {
+  setChargePortTargetState = async (state) => {
     const options = await this.getOptions();
 
     // Wake up, this is important!
@@ -719,32 +720,32 @@ class TeslaAccessory {
   // Starter Switch (Remote start)
   //
 
-  getStarterOn = async () => {
-    const options = await this.getOptions();
+  // getStarterOn = async () => {
+  //   const options = await this.getOptions();
 
-    // This will only succeed if the car is already online.
-    const state: VehicleData = await api("vehicleData", options);
+  //   // This will only succeed if the car is already online.
+  //   const state: VehicleData = await api("vehicleData", options);
 
-    const on = !!state.vehicle_state.remote_start;
+  //   const on = !!state.vehicle_state.remote_start;
 
-    this.log("Remote start active?", on);
-    return on;
-  };
+  //   this.log("Remote start active?", on);
+  //   return on;
+  // };
 
-  setStarterOn = async (on: boolean) => {
-    const options = await this.getOptions();
+  // setStarterOn = async (on: boolean) => {
+  //   const options = await this.getOptions();
 
-    // Wake up, this is important!
-    await this.wakeUp();
+  //   // Wake up, this is important!
+  //   await this.wakeUp();
 
-    this.log("Set remote starter to", on);
+  //   this.log("Set remote starter to", on);
 
-    if (on) {
-      await tesla.remoteStartAsync(options, this.password);
-    } else {
-      throw new Error("Cannot turn off the remote starter.");
-    }
-  };
+  //   if (on) {
+  //     await tesla.remoteStartAsync(options, this.password);
+  //   } else {
+  //     throw new Error("Cannot turn off the remote starter.");
+  //   }
+  // };
 
   //
   // General
@@ -772,19 +773,29 @@ class TeslaAccessory {
     const unlock = await lock("getAuthToken", 20000);
 
     try {
-      const { username, password, authToken } = this;
+      const { refreshToken, authToken, authTokenExpires, authTokenError } =
+        this;
 
-      // Return cached value if we have one.
-      if (authToken) return authToken;
+      if (authTokenError) {
+        throw new Error("Authentication has previously failed; not retrying.");
+      }
 
-      this.log("Logging into Tesla with username/password…");
-      const result = await api("login", username, password);
-      const token = result.authToken;
+      // Return cached value if we have one, and if it hasn't expired.
+      if (authToken && authTokenExpires && Date.now() < authTokenExpires) {
+        return authToken;
+      }
+
+      this.log("Exchanging refresh token for an access token…");
+      const response = await getAccessToken(refreshToken);
 
       // Save it in memory for future API calls.
-      this.log("Got a login token.");
-      this.authToken = token;
-      return token;
+      this.log("Got an access token.");
+      this.authToken = response.access_token;
+      this.authTokenExpires = response.expires_in * 1000 + Date.now() - 10000; // 10 second slop
+      return response.access_token;
+    } catch (error: any) {
+      this.authTokenError = error;
+      throw error;
     } finally {
       unlock();
     }
@@ -801,7 +812,7 @@ class TeslaAccessory {
     // Now figure out which vehicle matches your VIN.
     // `vehicles` is something like:
     // [ { id_s: '18488650400306554', vin: '5YJ3E1EA8JF006024', state: 'asleep', ... }, ... ]
-    const vehicle = vehicles.find(v => v.vin === vin);
+    const vehicle = vehicles.find((v) => v.vin === vin);
 
     if (!vehicle) {
       this.log(

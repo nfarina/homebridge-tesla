@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tesla",
-  "version": "2.6.0",
+  "version": "3.0.1",
   "description": "Tesla support for Homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -24,17 +24,20 @@
   ],
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
-    "teslajs": "^4.9.7"
+    "promptly": "^3.2.0",
+    "teslajs": "^4.9.11"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.5",
-    "@babel/plugin-proposal-class-properties": "^7.4.4",
-    "@babel/preset-env": "^7.4.5",
-    "@babel/preset-typescript": "^7.3.3",
-    "prettier": "^1.18.2",
-    "rollup": "^1.15.4",
+    "@babel/core": "^7.16.0",
+    "@babel/plugin-proposal-class-properties": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "@babel/preset-typescript": "^7.16.0",
+    "@types/promptly": "^3.0.2",
+    "prettier": "^2.4.1",
+    "rollup": "^2.59.0",
     "rollup-plugin-babel": "^4.3.2",
-    "rollup-plugin-node-resolve": "^5.0.2"
+    "rollup-plugin-node-resolve": "^5.0.2",
+    "typescript": "^4.4.4"
   },
   "scripts": {
     "dev": "rollup -c -w",

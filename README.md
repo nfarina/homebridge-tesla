@@ -8,9 +8,7 @@ Example config.json:
           "accessory": "Tesla",
           "name": "Model 3",
           "vin": "5JJYCB522AB296261",
-          "username": "bobs@burgers.com",
-          "password": "bobbobbaran",
-          "authToken": "authToken",
+          "refreshToken": "eyJhbGciOiJSUzI1…",
           "waitMinutes": 1
         }
       ]
@@ -21,12 +19,6 @@ Exposes lock services for doors, trunk, and front trunk. Also exposes an on/off 
 _If_ you define a value for `waitMinutes`, you can control the amount of
 time the plugin will wait for the car to wake up. The default is one minute.
 
-_If_ you define a value for `authToken`,
-you do not need to provide your username or password credentials.
-Generating a token can be done many ways.
-[Tokens for Teslas](https://tokens-for-teslas.herokuapp.com) is one option.
-`npm install -g generate-tesla-token` is another.
-
 If you use the example above, you would gain Siri commands like:
 
 - _"Unlock the Model 3 Doors"_ (unlock the vehicle)
@@ -35,12 +27,19 @@ If you use the example above, you would gain Siri commands like:
 - _"Open the Model 3 Charge Port"_ (open the charging port)
 - _"Turn on the Model 3 Climate"_ (turn on climate control)
 - _"Turn on the Model 3 Charger"_ (begin charging even if outside your schedule)
-- _"Turn on the Model 3 Starter"_ (enable keyless driving for 2 minutes - requires `password` in config, `authToken` is not sufficient)
 - _"Turn on the Model 3 Connection"_ (wake the car up so you can ask if it's locked, etc.)
 
 **Important Note**: The Home app will allow you to customize the default names of these services. You may be tempted to, for instance, change your "Model 3 Front Trunk" service to just "Front Trunk" so you can say "Open the Front Trunk". Don't do this! The names of these services are essentially _global_ and live in a giant pool of names. Siri will get confused unless every service has an easily distinguished name.
 
 You may disable various services using additional boolean configuration settings. See `config.schema.json` for more information.
+
+## Generating a Refresh Token
+
+Tesla has recently (early 2021) updated their OAuth authentication system as part of adding support for MFA tokens. Tesla API access requires a "refresh token" which is tricky to get. There are some apps available that can help with this, check out [this list](https://teslascope.com/help/generating-tokens). I have personally used the macOS app "Auth app for Tesla" (linked via that site) and it worked for me.
+
+Once you get a refresh token using an app (it's very long), you can paste it into your plugin configuration above.
+
+**NOTE** This plugin used to accept an `authToken` property which was intended to be an optional refresh token. If you have one already, you can just paste that token in the `refreshToken` property. The `authToken` property is no longer used, since the name `refreshToken` is more accurate and sets the token apart from OAuth "access tokens" which are only good for 8 hours.
 
 ## Multiple Vehicles
 
@@ -54,15 +53,13 @@ distinguished by their unique VIN numbers:
           "accessory": "Tesla",
           "name": "Model 3",
           "vin": "5JJYCB522AB296261",
-          "username": "bobs@burgers.com",
-          "password": "bobbobbaran"
+          "refreshToken": "…"
         },
         {
           "accessory": "Tesla",
           "name": "Model X",
           "vin": "1XSYCA2224A216162",
-          "username": "bobs@burgers.com",
-          "password": "bobbobbaran"
+          "refreshToken": "…"
         }
       ]
     }
@@ -79,8 +76,7 @@ Once that is done, you can issue commands like "Open the Model 3 HomeLink". If y
           "accessory": "Tesla",
           "name": "Model 3",
           "vin": "5JJYCB522AB296261",
-          "username": "bobs@burgers.com",
-          "password": "bobbobbaran"
+          "refreshToken": "…"
           "enableHomeLink": true,
           "latitude": "37.492655",
           "longitude": "-121.944644"
