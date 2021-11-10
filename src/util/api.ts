@@ -6,10 +6,19 @@ const tesla = require("teslajs");
 export default async function api(name: string, ...args: any[]): Promise<any> {
   try {
     return await tesla[name + "Async"](...args);
-  } catch (error) {
-    console.log("TeslaJS error:", error);
-    if (typeof error === "string") {
-      throw new Error(error);
+  } catch (errorOrString) {
+    let error;
+
+    if (typeof errorOrString === "string") {
+      error = new Error(errorOrString);
+    } else {
+      error = errorOrString;
+    }
+
+    if (error.message === "Error response: 408") {
+      console.log("Tesla timed out communicating with the vehicle.");
+    } else {
+      console.log("TeslaJS error:", errorOrString);
     }
 
     throw error;

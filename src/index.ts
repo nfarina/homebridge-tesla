@@ -41,7 +41,6 @@ class TeslaAccessory {
   disableChargeLevel: boolean | null;
 
   // Runtime state.
-  vehicleID: string | undefined;
   authToken: string | undefined;
   authTokenExpires: number | undefined;
   authTokenError: Error | undefined;
@@ -279,7 +278,7 @@ class TeslaAccessory {
     const state: VehicleState = await api("vehicleState", options);
 
     // Car has to be awake
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     // This will only succeed if the car is already online and within proximity to the
     // latitude and longitude settings.
@@ -300,6 +299,12 @@ class TeslaAccessory {
 
   getCurrentChargeLevel = async () => {
     const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      this.logIgnored("charge level");
+      throw new Error("Vehicle is asleep.");
+    }
+
     const chargelevel = await api("chargeState", options);
 
     return chargelevel.battery_level;
@@ -312,6 +317,11 @@ class TeslaAccessory {
   getSentryModeCurrentState = async () => {
     const options = await this.getOptions();
 
+    if (options.isAsleep) {
+      this.logIgnored("sentry mode current state");
+      throw new Error("Vehicle is asleep.");
+    }
+
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see the sentry mode state because that could drain battery!
     const state: VehicleState = await api("vehicleState", options);
@@ -323,6 +333,11 @@ class TeslaAccessory {
 
   getSentryModeTargetState = async () => {
     const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      this.logIgnored("sentry mode target state");
+      throw new Error("Vehicle is asleep.");
+    }
 
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see the sentry mode state because that could drain battery!
@@ -337,7 +352,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set sentry mode state to", state);
 
@@ -369,6 +384,11 @@ class TeslaAccessory {
   getSentryModeOn = async () => {
     const options = await this.getOptions();
 
+    if (options.isAsleep) {
+      this.logIgnored("sentry mode");
+      throw new Error("Vehicle is asleep.");
+    }
+
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see the sentry mode state because that could drain battery!
     const state: VehicleState = await api("vehicleState", options);
@@ -383,7 +403,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set sentry mode state to", on);
 
@@ -401,6 +421,11 @@ class TeslaAccessory {
   getLockCurrentState = async () => {
     const options = await this.getOptions();
 
+    if (options.isAsleep) {
+      this.logIgnored("door lock current state");
+      throw new Error("Vehicle is asleep.");
+    }
+
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see the lock state because that could drain battery!
     const state: VehicleState = await api("vehicleState", options);
@@ -412,6 +437,11 @@ class TeslaAccessory {
 
   getLockTargetState = async () => {
     const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      this.logIgnored("door lock target state");
+      throw new Error("Vehicle is asleep.");
+    }
 
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see the lock state because that could drain battery!
@@ -426,7 +456,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set lock state to", state);
 
@@ -470,7 +500,8 @@ class TeslaAccessory {
   setConnectionOn = async (on) => {
     if (on) {
       this.log("Waking up vehicle.");
-      await this.wakeUp();
+      const options = await this.getOptions();
+      await this.wakeUp(options);
     } else {
       this.log("Ignoring request to put vehicle to sleep, we can't do that!");
     }
@@ -482,6 +513,11 @@ class TeslaAccessory {
 
   getClimateOn = async () => {
     const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      this.logIgnored("climate state");
+      throw new Error("Vehicle is asleep.");
+    }
 
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see if climate is on because that could drain battery!
@@ -497,7 +533,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set climate to", on);
 
@@ -515,6 +551,11 @@ class TeslaAccessory {
   getTrunkCurrentState = async () => {
     const options = await this.getOptions();
 
+    if (options.isAsleep) {
+      this.logIgnored("trunk current state");
+      throw new Error("Vehicle is asleep.");
+    }
+
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see if climate is on because that could drain battery!
     const state: VehicleState = await api("vehicleState", options);
@@ -526,6 +567,11 @@ class TeslaAccessory {
 
   getTrunkTargetState = async () => {
     const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      this.logIgnored("trunk target state");
+      throw new Error("Vehicle is asleep.");
+    }
 
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see if climate is on because that could drain battery!
@@ -540,7 +586,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set trunk state to", state);
 
@@ -577,6 +623,11 @@ class TeslaAccessory {
   getFrunkCurrentState = async () => {
     const options = await this.getOptions();
 
+    if (options.isAsleep) {
+      this.logIgnored("frunk current state");
+      throw new Error("Vehicle is asleep.");
+    }
+
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see if climate is on because that could drain battery!
     const state: VehicleState = await api("vehicleState", options);
@@ -588,6 +639,11 @@ class TeslaAccessory {
 
   getFrunkTargetState = async () => {
     const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      this.logIgnored("frunk target state");
+      throw new Error("Vehicle is asleep.");
+    }
 
     // This will only succeed if the car is already online. We don't want to
     // wake it up just to see if climate is on because that could drain battery!
@@ -602,7 +658,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set frunk state to", state);
 
@@ -634,6 +690,11 @@ class TeslaAccessory {
   getChargePortCurrentState = async () => {
     const options = await this.getOptions();
 
+    if (options.isAsleep) {
+      this.logIgnored("charge port current state");
+      throw new Error("Vehicle is asleep.");
+    }
+
     // This will only succeed if the car is already online.
     const state: VehicleData = await api("vehicleData", options);
 
@@ -644,6 +705,11 @@ class TeslaAccessory {
 
   getChargePortTargetState = async () => {
     const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      this.logIgnored("charge port target state");
+      throw new Error("Vehicle is asleep.");
+    }
 
     // This will only succeed if the car is already online.
     const state: VehicleData = await api("vehicleData", options);
@@ -657,7 +723,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set charge port state to", state);
 
@@ -693,6 +759,11 @@ class TeslaAccessory {
   getChargerOn = async () => {
     const options = await this.getOptions();
 
+    if (options.isAsleep) {
+      this.logIgnored("charger state");
+      throw new Error("Vehicle is asleep.");
+    }
+
     // This will only succeed if the car is already online.
     const state: VehicleData = await api("vehicleData", options);
 
@@ -706,7 +777,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set charging to", on);
 
@@ -724,6 +795,11 @@ class TeslaAccessory {
   getStarterOn = async () => {
     const options = await this.getOptions();
 
+    if (options.isAsleep) {
+      this.logIgnored("starter state");
+      throw new Error("Vehicle is asleep.");
+    }
+
     // This will only succeed if the car is already online.
     const state: VehicleData = await api("vehicleData", options);
 
@@ -737,7 +813,7 @@ class TeslaAccessory {
     const options = await this.getOptions();
 
     // Wake up, this is important!
-    await this.wakeUp();
+    await this.wakeUp(options);
 
     this.log("Set remote starter to", on);
 
@@ -752,7 +828,7 @@ class TeslaAccessory {
   // General
   //
 
-  getOptions = async (): Promise<{ authToken: string; vehicleID: string }> => {
+  getOptions = async (): Promise<TeslaJSOptions> => {
     // Use a mutex to prevent multiple logins happening in parallel.
     const unlock = await lock("getOptions", 20000);
 
@@ -760,10 +836,10 @@ class TeslaAccessory {
       // First login if we don't have a token.
       const authToken = await this.getAuthToken();
 
-      // Grab the string ID of your vehicle.
-      const { id_s: vehicleID } = await this.getVehicle();
+      // Grab the string ID of your vehicle and the current state.
+      const { id_s: vehicleID, state } = await this.getVehicle();
 
-      return { authToken, vehicleID };
+      return { authToken, vehicleID, isAsleep: state === "asleep" };
     } finally {
       unlock();
     }
@@ -820,21 +896,27 @@ class TeslaAccessory {
         "No vehicles were found matching the VIN ${vin} entered in your config.json. Available vehicles:",
       );
       for (const vehicle of vehicles) {
-        this.log("${vehicle.vin} [${vehicle.display_name}]");
+        this.log(`${vehicle.vin} [${vehicle.display_name}]`);
       }
 
       throw new Error(`Couldn't find vehicle with VIN ${vin}.`);
     }
 
-    this.log(
-      `Using vehicle "${vehicle.display_name}" with state "${vehicle.state}"`,
-    );
+    // this.log(
+    //   `Using vehicle "${vehicle.display_name}" with state "${vehicle.state}"`,
+    // );
 
     return vehicle;
   };
 
-  wakeUp = async () => {
-    const options = await this.getOptions();
+  wakeUp = async (options: TeslaJSOptions) => {
+    // Is the car awake already?
+    if (!options.isAsleep) {
+      this.log("Vehicle is awake.");
+      return;
+    }
+
+    this.log("Sending wakeup command…");
 
     // Send the command.
     await api("wakeUp", options);
@@ -849,6 +931,7 @@ class TeslaAccessory {
 
       if (state === "online") {
         // Success!
+        this.log("Vehicle is now awake.");
         return;
       }
 
@@ -863,4 +946,26 @@ class TeslaAccessory {
       `Vehicle did not wake up within ${this.waitMinutes} minutes.`,
     );
   };
+
+  allIgnored: string[] = [];
+  logAllIgnoredTimeoutId: NodeJS.Timeout | undefined;
+
+  logIgnored = (ignored: string) => {
+    this.allIgnored.push(ignored);
+    if (this.logAllIgnoredTimeoutId) {
+      clearTimeout(this.logAllIgnoredTimeoutId);
+    }
+    this.logAllIgnoredTimeoutId = setTimeout(() => {
+      this.log(
+        `Vehicle was asleep; ignored ${this.allIgnored.length} requests for current state`,
+      );
+      this.allIgnored = [];
+    }, 2500);
+  };
+}
+
+interface TeslaJSOptions {
+  authToken: string;
+  vehicleID: string;
+  isAsleep: boolean;
 }
