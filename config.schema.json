@@ -70,7 +70,7 @@
       "disableDefrost": {
         "title": "Disable Defrost Control Service",
         "type": "boolean",
-        "description": "If climate control service is disable, this switch will also be disabled."
+        "description": "If climate control service is disabled, this switch will also be disabled."
       },
       "disableTrunk": {
         "title": "Disable Trunk Service",
