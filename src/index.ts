@@ -152,6 +152,8 @@ class TeslaAccessory {
       .on("get", callbackify(this.getDefrostOn))
       .on("set", callbackify(this.setDefrostOn));
 
+    this.defrostService = defrostService;
+
     // Enable the rear trunk lock service.
     const trunkService = new Service.LockMechanism(
       baseName + " Trunk",
