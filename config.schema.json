@@ -67,6 +67,10 @@
         "title": "Disable Climate Control Service",
         "type": "boolean"
       },
+      "disableDefrost": {
+        "title": "Disable Defrost Control Service",
+        "type": "boolean"
+      },
       "disableTrunk": {
         "title": "Disable Trunk Service",
         "type": "boolean"
