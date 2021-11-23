@@ -69,7 +69,8 @@
       },
       "disableDefrost": {
         "title": "Disable Defrost Control Service",
-        "type": "boolean"
+        "type": "boolean",
+        "description": "If climate control service is disable, this switch will also be disabled."
       },
       "disableTrunk": {
         "title": "Disable Trunk Service",

@@ -77,7 +77,8 @@ class TeslaAccessory {
     this.disableFrunk = config["disableFrunk"] || false;
     this.disableChargePort = config["disableChargePort"] || false;
     this.disableClimate = config["disableClimate"] || false;
-    this.disableDefrost = config["disableDefrost"] || false;
+    this.disableDefrost =
+      (this.disableClimate && config["disableDefrost"]) || false;
     this.disableCharger = config["disableCharger"] || false;
     this.disableStarter = config["disableStarter"] || false;
     this.enableHomeLink = config["enableHomeLink"] || false;
