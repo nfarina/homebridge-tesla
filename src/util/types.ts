@@ -118,6 +118,7 @@ const ExampleVehicleStateResponse = {
 export interface ClimateState {
   battery_heater: boolean;
   battery_heater_no_power: any;
+  defrost_mode: number;
   driver_temp_setting: number;
   fan_status: number;
   inside_temp: number;
@@ -149,6 +150,7 @@ export interface ClimateState {
 const ExampleClimateStateResponse: ClimateState = {
   battery_heater: false,
   battery_heater_no_power: null,
+  defrost_mode: 0,
   driver_temp_setting: 22.2,
   fan_status: 0,
   inside_temp: 12.9,
