@@ -35,6 +35,7 @@ class TeslaAccessory {
   disableFrunk: boolean | null;
   disableChargePort: boolean | null;
   disableClimate: boolean | null;
+  disableDefrost: boolean | null;
   disableCharger: boolean | null;
   disableStarter: boolean | null;
   enableHomeLink: boolean | null;
@@ -53,6 +54,7 @@ class TeslaAccessory {
   frunkService: any;
   chargePortService: any;
   climateService: any;
+  defrostService: any;
   chargerService: any;
   starterService: any;
   homelinkService: any;
@@ -75,6 +77,8 @@ class TeslaAccessory {
     this.disableFrunk = config["disableFrunk"] || false;
     this.disableChargePort = config["disableChargePort"] || false;
     this.disableClimate = config["disableClimate"] || false;
+    this.disableDefrost =
+      (this.disableClimate && config["disableDefrost"]) || false;
     this.disableCharger = config["disableCharger"] || false;
     this.disableStarter = config["disableStarter"] || false;
     this.enableHomeLink = config["enableHomeLink"] || false;
@@ -141,6 +145,15 @@ class TeslaAccessory {
       .on("set", callbackify(this.setClimateOn));
 
     this.climateService = climateService;
+
+    const defrostService = new Service.Switch(baseName + " Defrost", "defrost");
+
+    defrostService
+      .getCharacteristic(Characteristic.On)
+      .on("get", callbackify(this.getDefrostOn))
+      .on("set", callbackify(this.setDefrostOn));
+
+    this.defrostService = defrostService;
 
     // Enable the rear trunk lock service.
     const trunkService = new Service.LockMechanism(
@@ -245,6 +258,7 @@ class TeslaAccessory {
       ...(this.disableDoors ? [] : [this.lockService]),
       ...(this.disableSentryMode ? [] : [this.sentryModeService]),
       ...(this.disableClimate ? [] : [this.climateService]),
+      ...(this.disableDefrost ? [] : [this.defrostService]),
       ...(this.disableTrunk ? [] : [this.trunkService]),
       ...(this.disableFrunk ? [] : [this.frunkService]),
       ...(this.disableCharger ? [] : [this.chargerService]),
@@ -542,6 +556,39 @@ class TeslaAccessory {
     } else {
       await api("climateStop", options);
     }
+  };
+
+  //
+  // Defrost Switch
+  //
+
+  getDefrostOn = async () => {
+    const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      this.logIgnored("defrost state");
+      throw new Error("Vehicle is asleep.");
+    }
+
+    // This will only succeed if the car is already online. We don't want to
+    // wake it up just to see if climate is on because that could drain battery!
+    const state: ClimateState = await api("climateState", options);
+
+    const on = state.defrost_mode;
+
+    this.log("Defrost on?", !!on);
+    return !!on;
+  };
+
+  setDefrostOn = async (on) => {
+    const options = await this.getOptions();
+
+    // Wake up, this is important!
+    await this.wakeUp(options);
+
+    this.log("Set defrost to", on);
+
+    await api("maxDefrost", options, on);
   };
 
   //
