@@ -29,6 +29,7 @@ If you use the example above, you would gain Siri commands like:
 - _"Open the Model 3 Front Trunk"_ (pop the frunk)
 - _"Open the Model 3 Charge Port"_ (open the charging port)
 - _"Turn on the Model 3 Climate"_ (turn on climate control)
+- _"Turn on the Model 3 Defrost"_ (turn on maximum defrost mode)
 - _"Turn on the Model 3 Sentry Mode"_ (turn on sentry mode)
 - _"Turn on the Model 3 Charger"_ (begin charging even if outside your schedule)
 - _"Turn on the Model 3 Connection"_ (wake the car up so you can ask if it's locked, etc.)
