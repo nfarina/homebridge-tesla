@@ -84,6 +84,10 @@
         "title": "Disable Charger Service",
         "type": "boolean"
       },
+      "disableChargePort": {
+        "title": "Disable Charge Port Service",
+        "type": "boolean"
+      },
       "disableStarter": {
         "title": "Disable Starter Service",
         "type": "boolean"
