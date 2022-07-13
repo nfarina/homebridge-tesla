@@ -78,7 +78,7 @@ class TeslaAccessory {
     this.disableChargePort = config["disableChargePort"] || false;
     this.disableClimate = config["disableClimate"] || false;
     this.disableDefrost =
-      (this.disableClimate || config["disableDefrost"]) || false;
+      this.disableClimate || config["disableDefrost"] || false;
     this.disableCharger = config["disableCharger"] || false;
     this.disableStarter = config["disableStarter"] || false;
     this.enableHomeLink = config["enableHomeLink"] || false;
@@ -96,7 +96,10 @@ class TeslaAccessory {
 
     this.connectionService = connectionService;
 
-    const lockService = new Service.LockMechanism(baseName + " Doors", "doors");
+    const lockService = new Service.LockMechanism(
+      baseName + " Car Doors",
+      "carDoors",
+    );
 
     lockService
       .getCharacteristic(Characteristic.LockCurrentState)

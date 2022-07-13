@@ -24,7 +24,7 @@ time the plugin will wait for the car to wake up. The default is one minute.
 
 If you use the example above, you would gain Siri commands like:
 
-- _"Unlock the Model 3 Doors"_ (unlock the vehicle)
+- _"Unlock the Model 3 Car Doors"_ (unlock the vehicle)
 - _"Open the Model 3 Trunk"_ (pop the trunk)
 - _"Open the Model 3 Front Trunk"_ (pop the frunk)
 - _"Open the Model 3 Charge Port"_ (open the charging port)

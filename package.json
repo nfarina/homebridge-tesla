@@ -1,6 +1,6 @@
 {
   "name": "homebridge-tesla",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "Tesla support for Homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
