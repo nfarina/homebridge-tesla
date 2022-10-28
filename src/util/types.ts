@@ -1,3 +1,14 @@
+import { schema } from "../../config.schema.json";
+
+// Maps the type definition of config.schema.json to an actual TypeScript type.
+export type TeslaPluginConfig = {
+  [key in keyof typeof schema.properties]: typeof schema.properties[key]["default"];
+};
+
+//
+// Manually-inferred types for objects returned by Tesla's API
+//
+
 export interface Vehicle {
   id: number;
   vehicle_id: number;
