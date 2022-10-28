@@ -2,6 +2,8 @@ require("@babel/polyfill");
 import { AccessoryConfig, API, HAP, Logging } from "homebridge";
 import { ConnectionService } from "./services/ConnectionService";
 import { TeslaPluginService } from "./services/TeslaPluginService";
+import { TrunkService } from "./services/TrunkService";
+import { VehicleLockService } from "./services/VehicleLockService";
 import { TeslaApi } from "./util/api";
 import { TeslaPluginConfig } from "./util/types";
 
@@ -23,8 +25,6 @@ class TeslaAccessory {
   constructor(log: Logging, untypedConfig: AccessoryConfig) {
     const config: TeslaPluginConfig = untypedConfig as any;
 
-    console.log(arguments);
-
     this.log = log;
     this.name = config.name;
     this.tesla = new TeslaApi(log, config);
@@ -33,6 +33,14 @@ class TeslaAccessory {
     const args = [log, config, hap, this.tesla] as const;
 
     this.services.push(new ConnectionService(...args));
+
+    if (config.vehicleLock ?? true) {
+      this.services.push(new VehicleLockService(...args));
+    }
+
+    if (config.trunk ?? true) {
+      this.services.push(new TrunkService(...args));
+    }
   }
 
   getServices() {

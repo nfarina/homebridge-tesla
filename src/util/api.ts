@@ -1,10 +1,10 @@
 import { Logging } from "homebridge";
 import { lock } from "./mutex";
 import { getAccessToken } from "./token";
-import { TeslaPluginConfig, Vehicle } from "./types";
+import { TeslaPluginConfig, Vehicle, VehicleData } from "./types";
 import { wait } from "./wait";
 
-const tesla = require("teslajs");
+const teslajs = require("teslajs");
 
 export class TeslaApi {
   private log: Logging;
@@ -14,6 +14,10 @@ export class TeslaApi {
   private authToken: string | undefined;
   private authTokenExpires: number | undefined;
   private authTokenError: Error | undefined;
+
+  // Cached state.
+  private lastVehicleData: VehicleData | null = null;
+  private lastVehicleDataTime = 0;
 
   constructor(log: Logging, config: TeslaPluginConfig) {
     this.log = log;
@@ -147,7 +151,65 @@ export class TeslaApi {
 
     throw new Error(`Vehicle did not wake up within ${waitMinutes} minutes.`);
   };
+
+  public async getVehicleData(): Promise<VehicleData | null> {
+    // If the cached value is less than 2500ms old, return it.
+    const cacheAge = Date.now() - this.lastVehicleDataTime;
+    if (cacheAge < 2500) {
+      this.log("Using just-cached vehicle data.");
+      return this.lastVehicleData;
+    }
+
+    const options = await this.getOptions();
+
+    if (options.isAsleep) {
+      return this.lastVehicleData;
+    }
+
+    const data = await this.api("vehicleData", options);
+
+    // Cache the state.
+    this.lastVehicleData = data;
+    this.lastVehicleDataTime = Date.now();
+
+    return data;
+  }
+
+  public async command(
+    command: string,
+    options: TeslaJSOptions,
+    ...args: any[]
+  ) {
+    return this.api(command, options, ...args);
+  }
+
+  private async api(name: string, ...args: any[]): Promise<any> {
+    try {
+      return await teslajs[name + "Async"](...args);
+    } catch (error: any) {
+      if (error.message === "Error response: 408") {
+        console.log("Tesla timed out communicating with the vehicle.");
+      } else {
+        console.log("TeslaJS error:", error.message);
+      }
+
+      throw error;
+    }
+  }
 }
+
+// type StateCacheKeys = "vehicleState" | "climateState" | "chargeState";
+
+// type StateCacheEntry<T> = {
+//   value: T;
+//   time: number;
+// }
+
+// type StateCache = {
+//   vehicleState?: StateCacheEntry<VehicleState>;
+//   climateState?: StateCacheEntry<ClimateState>;
+//   chargeState?: StateCacheEntry<ChargeState>;
+// }
 
 interface TeslaJSOptions {
   authToken: string;
@@ -160,7 +222,7 @@ interface TeslaJSOptions {
 // Wrapper for TeslaJS functions that don't throw Error objects!
 export default async function api(name: string, ...args: any[]): Promise<any> {
   try {
-    return await tesla[name + "Async"](...args);
+    return await teslajs[name + "Async"](...args);
   } catch (errorOrString) {
     let error;
 

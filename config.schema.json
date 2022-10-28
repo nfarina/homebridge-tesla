@@ -39,81 +39,19 @@
         "required": false,
         "description": "Default is one (1) minute."
       },
-      "latitude": {
-        "title": "Latitude of HomeLink device",
-        "type": "string",
+      "vehicleLock": {
+        "title": "Vehicle Lock/Unlock",
+        "type": "boolean",
+        "default": true,
         "required": false,
-        "description": "This is the latitude position of your HomeLink device.",
-        "default": ""
+        "description": "Example: 'Open the Car Doors' to unlock the vehicle."
       },
-      "longitude": {
-        "title": "Longitude of HomeLink device",
-        "type": "string",
+      "trunk": {
+        "title": "Trunk Lock/Unlock",
+        "type": "boolean",
+        "default": true,
         "required": false,
-        "description": "This is the longitude position of your HomeLink device.",
-        "default": ""
-      },
-      "disableDoors": {
-        "title": "Disable Door Lock Service",
-        "type": "boolean",
-        "default": false
-      },
-      "disableSentryMode": {
-        "title": "Disable Sentry Mode Service",
-        "type": "boolean",
-        "default": false
-      },
-      "sentryModeSwitch": {
-        "title": "Sentry Mode Service as a Switch",
-        "type": "boolean",
-        "description": "This will configure Sentry Mode as a switch, instead of a lock.",
-        "default": false
-      },
-      "disableClimate": {
-        "title": "Disable Climate Control Service",
-        "type": "boolean",
-        "default": false
-      },
-      "disableDefrost": {
-        "title": "Disable Defrost Control Service",
-        "type": "boolean",
-        "description": "If climate control service is disabled, this switch will also be disabled.",
-        "default": false
-      },
-      "disableTrunk": {
-        "title": "Disable Trunk Service",
-        "type": "boolean",
-        "default": false
-      },
-      "disableFrunk": {
-        "title": "Disable Frunk Service",
-        "type": "boolean",
-        "default": false
-      },
-      "disableCharger": {
-        "title": "Disable Charger Service",
-        "type": "boolean",
-        "default": false
-      },
-      "disableChargePort": {
-        "title": "Disable Charge Port Service",
-        "type": "boolean",
-        "default": false
-      },
-      "disableStarter": {
-        "title": "Disable Starter Service",
-        "type": "boolean",
-        "default": false
-      },
-      "enableHomeLink": {
-        "title": "Enable HomeLink Service",
-        "type": "boolean",
-        "default": false
-      },
-      "disableChargeLevel": {
-        "title": "Disable Charge Level Service",
-        "type": "boolean",
-        "default": false
+        "description": "Example: 'Open the Trunk' to actuate the trunk."
       }
     }
   }

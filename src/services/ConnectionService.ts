@@ -18,8 +18,6 @@ export class ConnectionService extends TeslaPluginService {
     return service;
   }
 
-  on: boolean = false;
-
   async getOn() {
     const { log, tesla } = this;
 
@@ -37,7 +35,6 @@ export class ConnectionService extends TeslaPluginService {
       log("Waking up vehicle.");
       const options = await tesla.getOptions();
       await tesla.wakeUp(options);
-      this.on = true;
     } else {
       log("Ignoring request to put vehicle to sleep, we can't do that!");
     }
