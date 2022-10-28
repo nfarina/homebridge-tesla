@@ -10,31 +10,29 @@ import {
 import { TeslaApi } from "../util/api";
 import { TeslaPluginConfig } from "../util/types";
 
+export type TeslaPluginServiceContext = {
+  log: Logging;
+  hap: HAP;
+  config: TeslaPluginConfig;
+  tesla: TeslaApi;
+};
+
 export abstract class TeslaPluginService {
-  protected log: Logging;
-  protected hap: HAP;
-  protected config: TeslaPluginConfig;
-  protected tesla: TeslaApi;
+  protected context: TeslaPluginServiceContext;
   public service: Service;
 
-  constructor(
-    log: Logging,
-    config: TeslaPluginConfig,
-    hap: HAP,
-    tesla: TeslaApi,
-  ) {
-    this.log = log;
-    this.hap = hap;
-    this.config = config;
-    this.tesla = tesla;
+  constructor(context: TeslaPluginServiceContext) {
+    this.context = context;
     this.service = this.createService();
   }
 
-  protected abstract createService(): Service;
+  abstract createService(): Service;
 
   protected serviceName(name: string): string {
+    const { config } = this.context;
+
     // Optional prefix to prepend to all accessory names.
-    const prefix = (this.config.prefix ?? "").trim();
+    const prefix = (config.prefix ?? "").trim();
 
     if (prefix.length > 0) {
       return `${prefix} ${name}`;

@@ -44,14 +44,21 @@
         "type": "boolean",
         "default": true,
         "required": false,
-        "description": "Example: 'Open the Car Doors' to unlock the vehicle."
+        "description": "Example: 'Unlock the Car Doors'"
       },
       "trunk": {
-        "title": "Trunk Lock/Unlock",
+        "title": "Trunk Open/Close",
         "type": "boolean",
         "default": true,
         "required": false,
-        "description": "Example: 'Open the Trunk' to actuate the trunk."
+        "description": "Example: 'Open the Trunk'"
+      },
+      "frontTrunk": {
+        "title": "Front Trunk Open",
+        "type": "boolean",
+        "default": true,
+        "required": false,
+        "description": "Example: 'Open the Front Trunk'"
       }
     }
   }

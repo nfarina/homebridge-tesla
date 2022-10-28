@@ -1,16 +1,45 @@
 import { Service } from "homebridge";
 import { wait } from "../util/wait";
-import { TeslaPluginService } from "./TeslaPluginService";
+import {
+  TeslaPluginService,
+  TeslaPluginServiceContext,
+} from "./TeslaPluginService";
 
 const teslajs = require("teslajs");
 
+export type Trunk = {
+  name: string; // Like "Front Trunk"
+  subtype: string; // Like "frontTrunk"
+  apiName: any;
+};
+
+export const FrontTrunk: Trunk = {
+  name: "Front Trunk",
+  subtype: "frontTrunk",
+  apiName: teslajs.FRUNK,
+};
+
+export const RearTrunk: Trunk = {
+  name: "Trunk",
+  subtype: "trunk",
+  apiName: teslajs.TRUNK,
+};
+
 export class TrunkService extends TeslaPluginService {
+  trunk: Trunk;
+
+  constructor(trunk: Trunk, context: TeslaPluginServiceContext) {
+    super(context);
+    this.trunk = trunk;
+  }
+
   createService(): Service {
-    const { hap } = this;
+    const { trunk } = this;
+    const { hap } = this.context;
 
     const service = new hap.Service.LockMechanism(
-      this.serviceName("Trunk"),
-      "trunk",
+      this.serviceName(trunk.name),
+      trunk.subtype,
     );
 
     service
@@ -26,14 +55,15 @@ export class TrunkService extends TeslaPluginService {
   }
 
   async getCurrentState() {
-    const { log, tesla, hap } = this;
+    const { log, tesla, hap } = this.context;
+    const { name } = this.trunk;
 
     const data = await tesla.getVehicleData();
 
     // Assume closed when not connected.
     const opened = data ? !!data.vehicle_state.rt : false;
 
-    log("Get trunk current state; opened?", opened);
+    log(`Get ${name} current state; opened?`, opened);
 
     return opened
       ? hap.Characteristic.LockCurrentState.UNSECURED
@@ -41,14 +71,15 @@ export class TrunkService extends TeslaPluginService {
   }
 
   async getTargetState() {
-    const { log, tesla, hap } = this;
+    const { log, tesla, hap } = this.context;
+    const { name } = this.trunk;
 
     const data = await tesla.getVehicleData();
 
     // Assume closed when not connected.
     const opening = data ? !!data.vehicle_state.rt : false;
 
-    log("Get trunk target state; opening?", opening);
+    log(`Get ${name} target state; opening?`, opening);
 
     return opening
       ? hap.Characteristic.LockTargetState.UNSECURED
@@ -56,11 +87,13 @@ export class TrunkService extends TeslaPluginService {
   }
 
   async setTargetState(state: number) {
-    const { log, service, tesla, hap } = this;
+    const { service } = this;
+    const { log, tesla, hap } = this.context;
+    const { name, apiName } = this.trunk;
 
     const opening = state === hap.Characteristic.LockTargetState.UNSECURED;
 
-    log("Set trunk target state; opening?", opening);
+    log(`Set ${name} target state; opening?`, opening);
 
     const options = await tesla.getOptions();
 
@@ -75,19 +108,19 @@ export class TrunkService extends TeslaPluginService {
       if (data) {
         const opened = !!data.vehicle_state.rt;
         if (opened === opening) {
-          log("Trunk already in desired state, skipping.");
+          log(`${name} already in desired state, skipping.`);
           return;
         }
       }
 
-      log("Actuating trunk");
+      log(`Actuating ${name}`);
 
       // Now technically we are just "actuating" the state here; if you asked
       // to open the trunk, we will just "actuate" it. On the Model 3, that means
       // pop it no matter what you say - if you say "Close" it'll do nothing.
       // On the models with power liftgates, if you say "Open" or "Close"
       // it will do the same thing: "actuate" which means to just toggle it.
-      await tesla.command("openTrunk", options, teslajs.TRUNK);
+      await tesla.command("openTrunk", options, apiName);
     };
 
     // Don't wait for this to finish, just return immediately.

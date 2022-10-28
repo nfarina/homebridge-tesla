@@ -3,7 +3,7 @@ import { TeslaPluginService } from "./TeslaPluginService";
 
 export class ConnectionService extends TeslaPluginService {
   createService(): Service {
-    const { hap } = this;
+    const { hap } = this.context;
 
     const service = new hap.Service.Switch(
       this.serviceName("Connection"),
@@ -19,7 +19,7 @@ export class ConnectionService extends TeslaPluginService {
   }
 
   async getOn() {
-    const { log, tesla } = this;
+    const { log, tesla } = this.context;
 
     const { state } = await tesla.getVehicle();
     const on = state === "online";
@@ -29,7 +29,7 @@ export class ConnectionService extends TeslaPluginService {
   }
 
   async setOn(on: boolean) {
-    const { log, tesla } = this;
+    const { log, tesla } = this.context;
 
     if (on) {
       log("Waking up vehicle.");

@@ -4,7 +4,7 @@ import { TeslaPluginService } from "./TeslaPluginService";
 
 export class VehicleLockService extends TeslaPluginService {
   createService(): Service {
-    const { hap } = this;
+    const { hap } = this.context;
 
     const service = new hap.Service.LockMechanism(
       this.serviceName("Car Doors"),
@@ -24,7 +24,7 @@ export class VehicleLockService extends TeslaPluginService {
   }
 
   async getCurrentState() {
-    const { log, tesla, hap } = this;
+    const { log, tesla, hap } = this.context;
 
     const data = await tesla.getVehicleData();
 
@@ -39,7 +39,7 @@ export class VehicleLockService extends TeslaPluginService {
   }
 
   async getTargetState() {
-    const { log, tesla, hap } = this;
+    const { log, tesla, hap } = this.context;
 
     const data = await tesla.getVehicleData();
 
@@ -54,7 +54,8 @@ export class VehicleLockService extends TeslaPluginService {
   }
 
   async setTargetState(state: number) {
-    const { log, service, tesla, hap } = this;
+    const { service } = this;
+    const { log, tesla, hap } = this.context;
 
     const options = await tesla.getOptions();
 

@@ -1,8 +1,11 @@
 require("@babel/polyfill");
 import { AccessoryConfig, API, HAP, Logging } from "homebridge";
 import { ConnectionService } from "./services/ConnectionService";
-import { TeslaPluginService } from "./services/TeslaPluginService";
-import { TrunkService } from "./services/TrunkService";
+import {
+  TeslaPluginService,
+  TeslaPluginServiceContext,
+} from "./services/TeslaPluginService";
+import { FrontTrunk, RearTrunk, TrunkService } from "./services/TrunkService";
 import { VehicleLockService } from "./services/VehicleLockService";
 import { TeslaApi } from "./util/api";
 import { TeslaPluginConfig } from "./util/types";
@@ -24,22 +27,27 @@ class TeslaAccessory {
 
   constructor(log: Logging, untypedConfig: AccessoryConfig) {
     const config: TeslaPluginConfig = untypedConfig as any;
+    const tesla = new TeslaApi(log, config);
 
     this.log = log;
     this.name = config.name;
-    this.tesla = new TeslaApi(log, config);
+    this.tesla = tesla;
 
     // Create a new service for each feature.
-    const args = [log, config, hap, this.tesla] as const;
+    const context: TeslaPluginServiceContext = { log, hap, config, tesla };
 
-    this.services.push(new ConnectionService(...args));
+    this.services.push(new ConnectionService(context));
 
     if (config.vehicleLock ?? true) {
-      this.services.push(new VehicleLockService(...args));
+      this.services.push(new VehicleLockService(context));
     }
 
     if (config.trunk ?? true) {
-      this.services.push(new TrunkService(...args));
+      this.services.push(new TrunkService(RearTrunk, context));
+    }
+
+    if (config.frontTrunk ?? true) {
+      this.services.push(new TrunkService(FrontTrunk, context));
     }
   }
 
