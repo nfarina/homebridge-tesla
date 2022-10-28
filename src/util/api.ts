@@ -57,12 +57,22 @@ export class TeslaApi {
       this.log("Exchanging refresh token for an access token…");
       const response = await getAccessToken(refreshToken);
 
+      if (response.error) {
+        // Probably an invalid refresh token.
+        let message = response.error;
+        if (response.error === "server_error") {
+          message += " (possibly an invalid refresh token)";
+        }
+        throw new Error(message);
+      }
+
       // Save it in memory for future API calls.
       this.log("Got an access token.");
       this.authToken = response.access_token;
       this.authTokenExpires = response.expires_in * 1000 + Date.now() - 10000; // 10 second slop
       return response.access_token;
     } catch (error: any) {
+      this.log("Error while getting an access token:", error.message);
       this.authTokenError = error;
       throw error;
     } finally {
@@ -136,22 +146,6 @@ export class TeslaApi {
     }
 
     throw new Error(`Vehicle did not wake up within ${waitMinutes} minutes.`);
-  };
-
-  allIgnored: string[] = [];
-  logAllIgnoredTimeoutId: NodeJS.Timeout | undefined;
-
-  logIgnored = (ignored: string) => {
-    this.allIgnored.push(ignored);
-    if (this.logAllIgnoredTimeoutId) {
-      clearTimeout(this.logAllIgnoredTimeoutId);
-    }
-    this.logAllIgnoredTimeoutId = setTimeout(() => {
-      this.log(
-        `Vehicle was asleep; ignored ${this.allIgnored.length} requests for current state`,
-      );
-      this.allIgnored = [];
-    }, 2500);
   };
 }
 
