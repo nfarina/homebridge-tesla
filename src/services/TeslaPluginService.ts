@@ -19,14 +19,11 @@ export type TeslaPluginServiceContext = {
 
 export abstract class TeslaPluginService {
   protected context: TeslaPluginServiceContext;
-  public service: Service;
+  public abstract service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
     this.context = context;
-    this.service = this.createService();
   }
-
-  abstract createService(): Service;
 
   protected serviceName(name: string): string {
     const { config } = this.context;

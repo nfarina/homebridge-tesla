@@ -1,9 +1,15 @@
 import { Service } from "homebridge";
-import { TeslaPluginService } from "./TeslaPluginService";
+import {
+  TeslaPluginService,
+  TeslaPluginServiceContext,
+} from "./TeslaPluginService";
 
 export class ConnectionService extends TeslaPluginService {
-  createService(): Service {
-    const { hap } = this.context;
+  service: Service;
+
+  constructor(context: TeslaPluginServiceContext) {
+    super(context);
+    const { hap } = context;
 
     const service = new hap.Service.Switch(
       this.serviceName("Connection"),
@@ -15,7 +21,7 @@ export class ConnectionService extends TeslaPluginService {
       .on("get", this.createGetter(this.getOn))
       .on("set", this.createSetter(this.setOn));
 
-    return service;
+    this.service = service;
   }
 
   async getOn() {
@@ -24,7 +30,8 @@ export class ConnectionService extends TeslaPluginService {
     const { state } = await tesla.getVehicle();
     const on = state === "online";
 
-    log("Connection on?", on);
+    log(`Vehicle is ${state}.`);
+
     return on;
   }
 

@@ -1,10 +1,16 @@
 import { Service } from "homebridge";
 import { wait } from "../util/wait";
-import { TeslaPluginService } from "./TeslaPluginService";
+import {
+  TeslaPluginService,
+  TeslaPluginServiceContext,
+} from "./TeslaPluginService";
 
 export class VehicleLockService extends TeslaPluginService {
-  createService(): Service {
-    const { hap } = this.context;
+  service: Service;
+
+  constructor(context: TeslaPluginServiceContext) {
+    super(context);
+    const { hap } = context;
 
     const service = new hap.Service.LockMechanism(
       this.serviceName("Car Doors"),
@@ -20,7 +26,7 @@ export class VehicleLockService extends TeslaPluginService {
       .on("get", this.createGetter(this.getTargetState))
       .on("set", this.createSetter(this.setTargetState));
 
-    return service;
+    this.service = service;
   }
 
   async getCurrentState() {
@@ -31,7 +37,7 @@ export class VehicleLockService extends TeslaPluginService {
     // Assume locked when not connected.
     const locked = data ? data.vehicle_state.locked : true;
 
-    log("Get vehicle locked:", locked);
+    // log("Get vehicle locked:", locked);
 
     return locked
       ? hap.Characteristic.LockCurrentState.SECURED
@@ -46,7 +52,7 @@ export class VehicleLockService extends TeslaPluginService {
     // Assume locked when not connected.
     const locked = data ? data.vehicle_state.locked : true;
 
-    log("Get vehicle locking:", locked);
+    // log("Get vehicle locking:", locked);
 
     return locked
       ? hap.Characteristic.LockTargetState.SECURED
@@ -65,11 +71,11 @@ export class VehicleLockService extends TeslaPluginService {
 
       const locked = state === hap.Characteristic.LockTargetState.SECURED;
 
-      log("Set vehicle locking:", locked);
-
       if (locked) {
+        log("Locking vehicle.");
         await tesla.command("doorLock", options);
       } else {
+        log("Unlocking vehicle.");
         await tesla.command("doorUnlock", options);
       }
     };

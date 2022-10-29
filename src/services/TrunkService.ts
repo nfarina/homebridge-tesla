@@ -27,15 +27,13 @@ export const RearTrunk: Trunk = {
 
 export class TrunkService extends TeslaPluginService {
   trunk: Trunk;
+  service: Service;
 
   constructor(trunk: Trunk, context: TeslaPluginServiceContext) {
     super(context);
     this.trunk = trunk;
-  }
 
-  createService(): Service {
-    const { trunk } = this;
-    const { hap } = this.context;
+    const { hap } = context;
 
     const service = new hap.Service.LockMechanism(
       this.serviceName(trunk.name),
@@ -51,7 +49,7 @@ export class TrunkService extends TeslaPluginService {
       .on("get", this.createGetter(this.getTargetState))
       .on("set", this.createSetter(this.setTargetState));
 
-    return service;
+    this.service = service;
   }
 
   async getCurrentState() {
@@ -63,7 +61,7 @@ export class TrunkService extends TeslaPluginService {
     // Assume closed when not connected.
     const opened = data ? !!data.vehicle_state.rt : false;
 
-    log(`Get ${name} current state; opened?`, opened);
+    // log(`Get ${name} current state; opened?`, opened);
 
     return opened
       ? hap.Characteristic.LockCurrentState.UNSECURED
@@ -79,7 +77,7 @@ export class TrunkService extends TeslaPluginService {
     // Assume closed when not connected.
     const opening = data ? !!data.vehicle_state.rt : false;
 
-    log(`Get ${name} target state; opening?`, opening);
+    // log(`Get ${name} target state; opening?`, opening);
 
     return opening
       ? hap.Characteristic.LockTargetState.UNSECURED
@@ -93,7 +91,7 @@ export class TrunkService extends TeslaPluginService {
 
     const opening = state === hap.Characteristic.LockTargetState.UNSECURED;
 
-    log(`Set ${name} target state; opening?`, opening);
+    log(`${opening ? "Opening" : "Closing"} the ${name}…`);
 
     const options = await tesla.getOptions();
 
@@ -113,7 +111,7 @@ export class TrunkService extends TeslaPluginService {
         }
       }
 
-      log(`Actuating ${name}`);
+      log(`Actuating the ${name}.`);
 
       // Now technically we are just "actuating" the state here; if you asked
       // to open the trunk, we will just "actuate" it. On the Model 3, that means

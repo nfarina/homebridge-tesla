@@ -153,26 +153,42 @@ export class TeslaApi {
   };
 
   public async getVehicleData(): Promise<VehicleData | null> {
-    // If the cached value is less than 2500ms old, return it.
-    const cacheAge = Date.now() - this.lastVehicleDataTime;
-    if (cacheAge < 2500) {
-      this.log("Using just-cached vehicle data.");
-      return this.lastVehicleData;
+    // Use a mutex to prevent multiple calls happening in parallel.
+    const unlock = await lock("getVehicleData", 5000);
+
+    try {
+      // If the cached value is less than 2500ms old, return it.
+      const cacheAge = Date.now() - this.lastVehicleDataTime;
+      if (cacheAge < 2500) {
+        // this.log("Using just-cached vehicle data.");
+        return this.lastVehicleData;
+      }
+
+      const options = await this.getOptions();
+
+      if (options.isAsleep) {
+        this.log(
+          `Vehicle is asleep; using ${
+            this.lastVehicleData ? "last known" : "default"
+          } state.`,
+        );
+        return this.lastVehicleData;
+      }
+
+      // Get the latest data from Tesla.
+      this.log("Getting latest vehicle data from Tesla…");
+      const data = await this.api("vehicleData", options);
+
+      this.log("Vehicle data updated.");
+
+      // Cache the state.
+      this.lastVehicleData = data;
+      this.lastVehicleDataTime = Date.now();
+
+      return data;
+    } finally {
+      unlock();
     }
-
-    const options = await this.getOptions();
-
-    if (options.isAsleep) {
-      return this.lastVehicleData;
-    }
-
-    const data = await this.api("vehicleData", options);
-
-    // Cache the state.
-    this.lastVehicleData = data;
-    this.lastVehicleDataTime = Date.now();
-
-    return data;
   }
 
   public async command(
