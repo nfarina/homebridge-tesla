@@ -369,6 +369,7 @@ export interface VehicleData {
     timestamp: number; // 1549475000612,
     valet_mode: boolean; // false,
     vehicle_name: string; // "Tessie",
+    sentry_mode: boolean; // false,
   };
 }
 

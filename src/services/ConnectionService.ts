@@ -25,12 +25,10 @@ export class ConnectionService extends TeslaPluginService {
   }
 
   async getOn() {
-    const { log, tesla } = this.context;
+    const { tesla } = this.context;
 
     const { state } = await tesla.getVehicle();
     const on = state === "online";
-
-    log(`Vehicle is ${state}.`);
 
     return on;
   }

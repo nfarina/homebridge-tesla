@@ -40,25 +40,32 @@
         "description": "Default is one (1) minute."
       },
       "vehicleLock": {
-        "title": "Vehicle Lock/Unlock",
+        "title": "Car Doors",
         "type": "boolean",
         "default": true,
         "required": false,
         "description": "Example: 'Unlock the Car Doors'"
       },
       "trunk": {
-        "title": "Trunk Open/Close",
+        "title": "Trunk",
         "type": "boolean",
         "default": true,
         "required": false,
         "description": "Example: 'Open the Trunk'"
       },
       "frontTrunk": {
-        "title": "Front Trunk Open",
+        "title": "Front Trunk",
         "type": "boolean",
         "default": true,
         "required": false,
         "description": "Example: 'Open the Front Trunk'"
+      },
+      "sentryMode": {
+        "title": "Sentry Mode",
+        "type": "boolean",
+        "default": true,
+        "required": false,
+        "description": "Example: 'Turn on Sentry Mode'"
       }
     }
   }

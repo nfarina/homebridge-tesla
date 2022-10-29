@@ -30,14 +30,12 @@ export class VehicleLockService extends TeslaPluginService {
   }
 
   async getCurrentState() {
-    const { log, tesla, hap } = this.context;
+    const { tesla, hap } = this.context;
 
     const data = await tesla.getVehicleData();
 
     // Assume locked when not connected.
     const locked = data ? data.vehicle_state.locked : true;
-
-    // log("Get vehicle locked:", locked);
 
     return locked
       ? hap.Characteristic.LockCurrentState.SECURED
@@ -45,14 +43,12 @@ export class VehicleLockService extends TeslaPluginService {
   }
 
   async getTargetState() {
-    const { log, tesla, hap } = this.context;
+    const { tesla, hap } = this.context;
 
     const data = await tesla.getVehicleData();
 
     // Assume locked when not connected.
     const locked = data ? data.vehicle_state.locked : true;
-
-    // log("Get vehicle locking:", locked);
 
     return locked
       ? hap.Characteristic.LockTargetState.SECURED

@@ -1,6 +1,8 @@
 require("@babel/polyfill");
 import { AccessoryConfig, API, HAP, Logging } from "homebridge";
+import { BatteryService } from "./services/BatteryService";
 import { ConnectionService } from "./services/ConnectionService";
+import { SentryModeService } from "./services/SentryModeService";
 import {
   TeslaPluginService,
   TeslaPluginServiceContext,
@@ -37,6 +39,7 @@ class TeslaAccessory {
     const context: TeslaPluginServiceContext = { log, hap, config, tesla };
 
     this.services.push(new ConnectionService(context));
+    this.services.push(new BatteryService(context));
 
     if (config.vehicleLock ?? true) {
       this.services.push(new VehicleLockService(context));
@@ -48,6 +51,10 @@ class TeslaAccessory {
 
     if (config.frontTrunk ?? true) {
       this.services.push(new TrunkService(FrontTrunk, context));
+    }
+
+    if (config.sentryMode ?? true) {
+      this.services.push(new SentryModeService(context));
     }
   }
 

@@ -53,15 +53,12 @@ export class TrunkService extends TeslaPluginService {
   }
 
   async getCurrentState() {
-    const { log, tesla, hap } = this.context;
-    const { name } = this.trunk;
+    const { tesla, hap } = this.context;
 
     const data = await tesla.getVehicleData();
 
     // Assume closed when not connected.
     const opened = data ? !!data.vehicle_state.rt : false;
-
-    // log(`Get ${name} current state; opened?`, opened);
 
     return opened
       ? hap.Characteristic.LockCurrentState.UNSECURED
@@ -69,15 +66,12 @@ export class TrunkService extends TeslaPluginService {
   }
 
   async getTargetState() {
-    const { log, tesla, hap } = this.context;
-    const { name } = this.trunk;
+    const { tesla, hap } = this.context;
 
     const data = await tesla.getVehicleData();
 
     // Assume closed when not connected.
     const opening = data ? !!data.vehicle_state.rt : false;
-
-    // log(`Get ${name} target state; opening?`, opening);
 
     return opening
       ? hap.Characteristic.LockTargetState.UNSECURED
@@ -91,11 +85,11 @@ export class TrunkService extends TeslaPluginService {
 
     const opening = state === hap.Characteristic.LockTargetState.UNSECURED;
 
-    log(`${opening ? "Opening" : "Closing"} the ${name}…`);
-
     const options = await tesla.getOptions();
 
     const background = async () => {
+      log(`${opening ? "Opening" : "Closing"} the ${name}…`);
+
       // Wake up, this is important!
       await tesla.wakeUp(options);
 
