@@ -94,9 +94,7 @@ Once that is done, you can issue commands like "Open the Model 3 HomeLink". If y
 
 The car can supply the current charge level of the battery as a percentage. This will only update if the car is awake. Asking Siri about your car's charge level will not wake up the car (because Siri asks a lot in the background). So you'll have to issue a write command like "Turn on the Model 3 Connection" first.
 
-The Charge Level can be disabled in either your Homebridge UI or by adding the following to the car's accessory section.
-
-> "disableChargeLevel": true
+Note that asking Siri about "battery level" or "charge level" of anything will usually result in Siri telling you the battery level of your phone. Instead, you can ask Siri "Is the Model 3 charging?" and the level should be returned in the reply.
 
 ## Development
 

@@ -240,6 +240,9 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
     }
   }
 
+  /**
+   * Wakes up the vehicle,
+   */
   public async wakeAndCommand(
     func: (options: TeslaJSOptions) => Promise<void>,
   ) {
@@ -248,15 +251,19 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
     const options = await this.getOptions({ ignoreCache: true });
 
     const background = async () => {
-      if (options.isAsleep) {
-        await this.wakeUp(options);
+      try {
+        if (options.isAsleep) {
+          await this.wakeUp(options);
+        }
+
+        await func(options);
+
+        // Refresh vehicle data since we're already connected and we just sent
+        // a command.
+        await this.getVehicleData({ ignoreCache: true });
+      } catch (error: any) {
+        this.log("Error while executing command:", error.message);
       }
-
-      await func(options);
-
-      // Refresh vehicle data since we're already connected and we just sent
-      // a command.
-      await this.getVehicleData({ ignoreCache: true });
     };
 
     const promise = background();
@@ -288,26 +295,13 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
   }
 }
 
-// type StateCacheKeys = "vehicleState" | "climateState" | "chargeState";
-
-// type StateCacheEntry<T> = {
-//   value: T;
-//   time: number;
-// }
-
-// type StateCache = {
-//   vehicleState?: StateCacheEntry<VehicleState>;
-//   climateState?: StateCacheEntry<ClimateState>;
-//   chargeState?: StateCacheEntry<ChargeState>;
-// }
-
 interface TeslaJSOptions {
   authToken: string;
   vehicleID: string;
   isAsleep: boolean;
 }
 
-//tesla.setLogLevel(tesla.API_LOG_ALL);
+// teslajs.setLogLevel(tesla.API_LOG_ALL);
 
 // Wrapper for TeslaJS functions that don't throw Error objects!
 export default async function api(name: string, ...args: any[]): Promise<any> {
