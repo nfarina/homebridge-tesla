@@ -1,4 +1,5 @@
-import { Service } from "homebridge";
+import { CharacteristicValue, Service } from "homebridge";
+import { VehicleData } from "../util/types";
 import { wait } from "../util/wait";
 import {
   TeslaPluginService,
@@ -10,29 +11,32 @@ export class VehicleLockService extends TeslaPluginService {
 
   constructor(context: TeslaPluginServiceContext) {
     super(context);
-    const { hap } = context;
+    const { hap, tesla } = context;
 
     const service = new hap.Service.LockMechanism(
       this.serviceName("Car Doors"),
       "carDoors",
     );
 
-    service
+    const currentState = service
       .getCharacteristic(hap.Characteristic.LockCurrentState)
       .on("get", this.createGetter(this.getCurrentState));
 
-    service
+    const targetState = service
       .getCharacteristic(hap.Characteristic.LockTargetState)
       .on("get", this.createGetter(this.getTargetState))
       .on("set", this.createSetter(this.setTargetState));
 
     this.service = service;
+
+    tesla.on("vehicleDataUpdated", (data) => {
+      currentState.updateValue(this.getCurrentState(data));
+      targetState.updateValue(this.getTargetState(data));
+    });
   }
 
-  async getCurrentState() {
-    const { tesla, hap } = this.context;
-
-    const data = await tesla.getVehicleData();
+  getCurrentState(data: VehicleData | null): CharacteristicValue {
+    const { hap } = this.context;
 
     // Assume locked when not connected.
     const locked = data ? data.vehicle_state.locked : true;
@@ -42,10 +46,8 @@ export class VehicleLockService extends TeslaPluginService {
       : hap.Characteristic.LockCurrentState.UNSECURED;
   }
 
-  async getTargetState() {
-    const { tesla, hap } = this.context;
-
-    const data = await tesla.getVehicleData();
+  getTargetState(data: VehicleData | null): CharacteristicValue {
+    const { hap } = this.context;
 
     // Assume locked when not connected.
     const locked = data ? data.vehicle_state.locked : true;
@@ -59,25 +61,17 @@ export class VehicleLockService extends TeslaPluginService {
     const { service } = this;
     const { log, tesla, hap } = this.context;
 
-    const options = await tesla.getOptions();
-
-    const background = async () => {
-      // Wake up, this is important!
-      await tesla.wakeUp(options);
-
+    await tesla.wakeAndCommand(async (options) => {
       const locked = state === hap.Characteristic.LockTargetState.SECURED;
 
       if (locked) {
         log("Locking vehicle.");
-        await tesla.command("doorLock", options);
+        await tesla.api("doorLock", options);
       } else {
         log("Unlocking vehicle.");
-        await tesla.command("doorUnlock", options);
+        await tesla.api("doorUnlock", options);
       }
-    };
-
-    // Don't wait for this to finish, just return immediately.
-    background();
+    });
 
     // We need to update the current state "later" because Siri can't
     // handle receiving the change event inside the same "set target state"

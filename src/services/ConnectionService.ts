@@ -37,9 +37,12 @@ export class ConnectionService extends TeslaPluginService {
     const { log, tesla } = this.context;
 
     if (on) {
-      log("Waking up vehicle.");
       const options = await tesla.getOptions();
       await tesla.wakeUp(options);
+
+      // Force a refresh of the vehicle data which will cause all services
+      // to update HomeKit with the latest state.
+      await tesla.getVehicleData({ ignoreCache: true });
     } else {
       log("Ignoring request to put vehicle to sleep, we can't do that!");
     }

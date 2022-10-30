@@ -1,4 +1,5 @@
 import { Logging } from "homebridge";
+import { EventEmitter } from "./events";
 import { lock } from "./mutex";
 import { getAccessToken } from "./token";
 import { TeslaPluginConfig, Vehicle, VehicleData } from "./types";
@@ -6,7 +7,11 @@ import { wait } from "./wait";
 
 const teslajs = require("teslajs");
 
-export class TeslaApi {
+export interface TeslaApiEvents {
+  vehicleDataUpdated(data: VehicleData): void;
+}
+
+export class TeslaApi extends EventEmitter<TeslaApiEvents> {
   private log: Logging;
   private config: TeslaPluginConfig;
 
@@ -16,15 +21,20 @@ export class TeslaApi {
   private authTokenError: Error | undefined;
 
   // Cached state.
+  private lastOptions: TeslaJSOptions | null = null;
+  private lastOptionsTime = 0;
   private lastVehicleData: VehicleData | null = null;
   private lastVehicleDataTime = 0;
 
   constructor(log: Logging, config: TeslaPluginConfig) {
+    super();
     this.log = log;
     this.config = config;
   }
 
-  getOptions = async (): Promise<TeslaJSOptions> => {
+  getOptions = async ({
+    ignoreCache,
+  }: { ignoreCache?: boolean } = {}): Promise<TeslaJSOptions> => {
     // Use a mutex to prevent multiple logins happening in parallel.
     const unlock = await lock("getOptions", 20000);
 
@@ -32,10 +42,28 @@ export class TeslaApi {
       // First login if we don't have a token.
       const authToken = await this.getAuthToken();
 
+      // If the cached value is less than 2500ms old, return it.
+      const cacheAge = Date.now() - this.lastOptionsTime;
+
+      if (cacheAge < 2500 && !ignoreCache && this.lastOptions) {
+        // this.log("Using just-cached options data.");
+        return this.lastOptions;
+      }
+
       // Grab the string ID of your vehicle and the current state.
       const { id_s: vehicleID, state } = await this.getVehicle();
 
-      return { authToken, vehicleID, isAsleep: state === "asleep" };
+      const options = { authToken, vehicleID, isAsleep: state === "asleep" };
+
+      this.log(
+        `Tesla reports vehicle is ${options.isAsleep ? "sleeping" : "awake"}.`,
+      );
+
+      // Cache the state.
+      this.lastOptions = options;
+      this.lastOptionsTime = Date.now();
+
+      return options;
     } finally {
       unlock();
     }
@@ -152,31 +180,49 @@ export class TeslaApi {
     throw new Error(`Vehicle did not wake up within ${waitMinutes} minutes.`);
   };
 
-  public async getVehicleData(): Promise<VehicleData | null> {
+  public async getVehicleData({
+    ignoreCache,
+  }: { ignoreCache?: boolean } = {}): Promise<VehicleData | null> {
     // Use a mutex to prevent multiple calls happening in parallel.
     const unlock = await lock("getVehicleData", 5000);
 
     try {
       // If the cached value is less than 2500ms old, return it.
       const cacheAge = Date.now() - this.lastVehicleDataTime;
-      if (cacheAge < 2500) {
+
+      if (cacheAge < 2500 && !ignoreCache) {
         // this.log("Using just-cached vehicle data.");
         return this.lastVehicleData;
       }
 
-      const options = await this.getOptions();
+      const options = await this.getOptions({ ignoreCache });
 
       if (options.isAsleep) {
+        // If we're ignoring cache, we'll have to return null here.
+        if (ignoreCache) {
+          return null;
+        }
+
         this.log(
           `Vehicle is asleep; using ${
             this.lastVehicleData ? "last known" : "default"
           } state.`,
         );
+
+        // Set the last update time to now to prevent spamming the logs with the
+        // directly-above message. If the vehicle becomes awake, we'll get
+        // called with ignoreCache=true anyway.
+        this.lastVehicleDataTime = Date.now();
+
         return this.lastVehicleData;
       }
 
       // Get the latest data from Tesla.
-      this.log("Getting latest vehicle data from Tesla…");
+      this.log(
+        `Getting latest vehicle data from Tesla${
+          ignoreCache ? " (forced update)" : ""
+        }…`,
+      );
       const data = await this.api("vehicleData", options);
 
       this.log("Vehicle data updated.");
@@ -185,23 +231,51 @@ export class TeslaApi {
       this.lastVehicleData = data;
       this.lastVehicleDataTime = Date.now();
 
+      // Notify any listeners.
+      this.emit("vehicleDataUpdated", data);
+
       return data;
     } finally {
       unlock();
     }
   }
 
-  public async command(
-    command: string,
-    options: TeslaJSOptions,
-    ...args: any[]
+  public async wakeAndCommand(
+    func: (options: TeslaJSOptions) => Promise<void>,
   ) {
-    return this.api(command, options, ...args);
+    // We do want to wait for this to finish because it can help surface token
+    // errors to the end-user attempting to execute the command.
+    const options = await this.getOptions({ ignoreCache: true });
+
+    const background = async () => {
+      if (options.isAsleep) {
+        await this.wakeUp(options);
+      }
+
+      await func(options);
+
+      // Refresh vehicle data since we're already connected and we just sent
+      // a command.
+      await this.getVehicleData({ ignoreCache: true });
+    };
+
+    const promise = background();
+
+    // Only wait on the promise if we're already connected. Otherwise don't make
+    // the end-user wait for the car to wake up because it could take much
+    // longer than Siri's timeout and ends up being a bad experience.
+    if (!options.isAsleep) {
+      await promise;
+    }
   }
 
-  private async api(name: string, ...args: any[]): Promise<any> {
+  public async api(
+    name: string,
+    options: TeslaJSOptions,
+    ...args: any[]
+  ): Promise<any> {
     try {
-      return await teslajs[name + "Async"](...args);
+      return await teslajs[name + "Async"](options, ...args);
     } catch (error: any) {
       if (error.message === "Error response: 408") {
         console.log("Tesla timed out communicating with the vehicle.");

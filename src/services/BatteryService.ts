@@ -1,4 +1,5 @@
 import { Service } from "homebridge";
+import { VehicleData } from "../util/types";
 import {
   TeslaPluginService,
   TeslaPluginServiceContext,
@@ -9,56 +10,54 @@ export class BatteryService extends TeslaPluginService {
 
   constructor(context: TeslaPluginServiceContext) {
     super(context);
-    const { hap } = context;
+    const { hap, tesla } = context;
 
     const service = new hap.Service.BatteryService(
       this.serviceName("Battery"),
       "battery",
     );
 
-    service
+    const batteryLevel = service
       .getCharacteristic(hap.Characteristic.BatteryLevel)
       .on("get", this.createGetter(this.getLevel));
 
-    service
+    const chargingState = service
       .getCharacteristic(hap.Characteristic.ChargingState)
       .on("get", this.createGetter(this.getChargingState));
 
-    service
+    const lowBattery = service
       .getCharacteristic(hap.Characteristic.StatusLowBattery)
       .on("get", this.createGetter(this.getLowBattery));
 
     this.service = service;
+
+    tesla.on("vehicleDataUpdated", (data) => {
+      batteryLevel.updateValue(this.getLevel(data));
+      chargingState.updateValue(this.getChargingState(data));
+      lowBattery.updateValue(this.getLowBattery(data));
+    });
   }
 
-  async getLevel() {
-    const { tesla } = this.context;
-
-    const data = await tesla.getVehicleData();
-
-    // Assume 0% when not connected and no last-known state.
-    return data ? data.charge_state.battery_level : 0;
+  getLevel(data: VehicleData | null): number {
+    // Assume 50% when not connected and no last-known state.
+    return data ? data.charge_state.battery_level : 50;
   }
 
-  async getChargingState() {
-    const { tesla, hap } = this.context;
+  getChargingState(data: VehicleData | null): number {
+    const { hap } = this.context;
 
-    const data = await tesla.getVehicleData();
-
-    // Assume not charging when not connected and no last-known state.
-    const charging = data
-      ? data.charge_state.charging_state === "Charging"
-      : hap.Characteristic.ChargingState.NOT_CHARGING;
-
-    return charging;
+    if (data) {
+      return data.charge_state.charging_state === "Charging"
+        ? hap.Characteristic.ChargingState.CHARGING
+        : hap.Characteristic.ChargingState.NOT_CHARGING;
+    } else {
+      // Assume not charging when not connected and no last-known state.
+      return hap.Characteristic.ChargingState.NOT_CHARGING;
+    }
   }
 
-  async getLowBattery() {
-    const { tesla } = this.context;
-
-    const data = await tesla.getVehicleData();
-
-    // Assume low battery when not connected and no last-known state.
-    return data ? data.charge_state.battery_level <= 20 : true;
+  getLowBattery(data: VehicleData | null): boolean {
+    // Assume normal battery when not connected and no last-known state.
+    return data ? data.charge_state.battery_level <= 20 : false;
   }
 }

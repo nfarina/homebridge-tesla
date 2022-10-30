@@ -8,7 +8,7 @@ import {
   Service,
 } from "homebridge";
 import { TeslaApi } from "../util/api";
-import { TeslaPluginConfig } from "../util/types";
+import { TeslaPluginConfig, VehicleData } from "../util/types";
 
 export type TeslaPluginServiceContext = {
   log: Logging;
@@ -46,8 +46,9 @@ export abstract class TeslaPluginService {
     getter: Getter<T>,
   ): GetterCallback {
     return (callback) => {
-      getter
-        .call(this)
+      this.context.tesla
+        .getVehicleData()
+        .then((data) => getter.call(this, data))
         .then((value) => callback(null, value))
         .catch((error: Error) => callback(error));
     };
@@ -65,7 +66,10 @@ export abstract class TeslaPluginService {
   }
 }
 
-type Getter<T extends CharacteristicValue> = (this: any) => Promise<T>;
+type Getter<T extends CharacteristicValue> = (
+  this: any,
+  data: VehicleData | null,
+) => Promise<T> | T;
 
 type GetterCallback = (callback: CharacteristicGetCallback) => void;
 

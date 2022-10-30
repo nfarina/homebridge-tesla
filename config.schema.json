@@ -66,6 +66,13 @@
         "default": true,
         "required": false,
         "description": "Example: 'Turn on Sentry Mode'"
+      },
+      "chargeLimit": {
+        "title": "Charge Limit",
+        "type": "boolean",
+        "default": false,
+        "required": false,
+        "description": "Example: 'Set the Charge Limit to 80%'. NOTE: Will appear in HomeKit as a Light bulb! There's no other way to do it."
       }
     }
   }

@@ -1,5 +1,6 @@
-import babel from "rollup-plugin-babel";
-import resolve from "rollup-plugin-node-resolve";
+import babel from "@rollup/plugin-babel";
+import resolve from "@rollup/plugin-node-resolve";
+import json from "@rollup/plugin-json";
 
 const extensions = [".ts", ".js"];
 
@@ -17,6 +18,8 @@ export default {
     babel({
       extensions,
       exclude: "node_modules/**", // only transpile our source code
+      babelHelpers: "bundled",
     }),
+    json(),
   ],
 };

@@ -1,6 +1,8 @@
 require("@babel/polyfill");
 import { AccessoryConfig, API, HAP, Logging } from "homebridge";
+import { schema } from "../config.schema.json";
 import { BatteryService } from "./services/BatteryService";
+import { ChargeLimitService } from "./services/ChargeLimitService";
 import { ConnectionService } from "./services/ConnectionService";
 import { SentryModeService } from "./services/SentryModeService";
 import {
@@ -34,6 +36,7 @@ class TeslaAccessory {
     this.log = log;
     this.name = config.name;
     this.tesla = tesla;
+    tesla.getVehicleData();
 
     // Create a new service for each feature.
     const context: TeslaPluginServiceContext = { log, hap, config, tesla };
@@ -41,20 +44,26 @@ class TeslaAccessory {
     this.services.push(new ConnectionService(context));
     this.services.push(new BatteryService(context));
 
-    if (config.vehicleLock ?? true) {
+    const { properties } = schema;
+
+    if (config.vehicleLock ?? properties.vehicleLock.default) {
       this.services.push(new VehicleLockService(context));
     }
 
-    if (config.trunk ?? true) {
+    if (config.trunk ?? properties.trunk.default) {
       this.services.push(new TrunkService(RearTrunk, context));
     }
 
-    if (config.frontTrunk ?? true) {
+    if (config.frontTrunk ?? properties.frontTrunk.default) {
       this.services.push(new TrunkService(FrontTrunk, context));
     }
 
-    if (config.sentryMode ?? true) {
+    if (config.sentryMode ?? properties.sentryMode.default) {
       this.services.push(new SentryModeService(context));
+    }
+
+    if (config.chargeLimit ?? properties.chargeLimit.default) {
+      this.services.push(new ChargeLimitService(context));
     }
   }
 
