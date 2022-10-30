@@ -317,6 +317,7 @@ export interface VehicleData {
     is_preconditioning: boolean; // false,
     is_rear_defroster_on: boolean; // false,
     left_temp_direction: number; // 536,
+    defrost_mode: number; // 0 or 2 (that I've seen),
     max_avail_temp: number; // 28,
     min_avail_temp: number; // 15,
     outside_temp: number; // -2.5,

@@ -35,7 +35,7 @@
         "default": 1,
         "maximum": 10,
         "minimum": 1,
-        "description": "Default is one (1) minute."
+        "description": "Default is one (1) minute"
       },
       "vehicleLock": {
         "title": "Car Doors",
@@ -71,13 +71,25 @@
         "title": "Climate",
         "type": "boolean",
         "default": true,
-        "description": "Example: 'Set the Climate to 72'."
+        "description": "Example: 'Set the Climate to 72'"
+      },
+      "steeringWheelHeater": {
+        "title": "Steering Wheel Heater",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Turn on the Steering Wheel Heater'"
+      },
+      "defrost": {
+        "title": "Defrost",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Turn on the Defrost'"
       },
       "celsius": {
         "title": "Use Celsius",
         "type": "boolean",
         "default": false,
-        "description": "Uses celsius for degrees in supported services."
+        "description": "Uses celsius for degrees in supported services"
       }
     }
   }

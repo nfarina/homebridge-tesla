@@ -4,7 +4,9 @@ import { BatteryService } from "./services/BatteryService";
 import { ChargeLimitService } from "./services/ChargeLimitService";
 import { ClimateService } from "./services/ClimateService";
 import { ConnectionService } from "./services/ConnectionService";
+import { DefrostService } from "./services/DefrostService";
 import { SentryModeService } from "./services/SentryModeService";
+import { SteeringWheelHeaterService } from "./services/SteeringWheelHeaterService";
 import {
   TeslaPluginService,
   TeslaPluginServiceContext,
@@ -60,8 +62,16 @@ class TeslaAccessory {
       this.services.push(new ClimateService(context));
     }
 
+    if (getConfigValue(config, "steeringWheelHeater")) {
+      this.services.push(new SteeringWheelHeaterService(context));
+    }
+
     if (getConfigValue(config, "chargeLimit")) {
       this.services.push(new ChargeLimitService(context));
+    }
+
+    if (getConfigValue(config, "defrost")) {
+      this.services.push(new DefrostService(context));
     }
 
     if (getConfigValue(config, "sentryMode")) {

@@ -1,59 +1,15 @@
 // @ts-nocheck - unported script
-require("@babel/polyfill");
-import api from "./util/api";
-import callbackify from "./util/callbackify";
-import { ClimateState, VehicleData, VehicleState } from "./util/types";
-import { wait } from "./util/wait";
-
-const util = require("util");
-const tesla = require("teslajs");
-
-let Service: any, Characteristic: any;
-
-export default function (homebridge: any) {
-  Service = homebridge.hap.Service;
-  Characteristic = homebridge.hap.Characteristic;
-
-  homebridge.registerAccessory("homebridge-tesla", "Tesla", TeslaAccessory);
-}
 
 class TeslaAccessory {
-  // From config.
-  log: Function;
-  name: string;
-  vin: string;
-  refreshToken: string;
-  password: string;
-  waitMinutes: number;
   latitude: number;
   longitude: number;
   disableDoors: boolean | null;
   disableChargePort: boolean | null;
-  disableDefrost: boolean | null;
   disableCharger: boolean | null;
   disableStarter: boolean | null;
   enableHomeLink: boolean | null;
 
-  // Runtime state.
-  authToken: string | undefined;
-  authTokenExpires: number | undefined;
-  authTokenError: Error | undefined;
-
-  // Services exposed.
-  lockService: any;
-  chargePortService: any;
-  defrostService: any;
-  chargerService: any;
-  starterService: any;
-  homelinkService: any;
-
   constructor(log, config) {
-    this.log = log;
-    this.name = config["name"];
-    this.vin = config["vin"];
-    this.waitMinutes = config["waitMinutes"] || 1; // default to one minute.
-    this.refreshToken = config["refreshToken"];
-    this.password = config["password"];
     this.latitude = config["latitude"];
     this.longitude = config["longitude"];
     this.disableDoors = config["disableDoors"] || false;
@@ -64,15 +20,6 @@ class TeslaAccessory {
 
     // Optional prefix to prepend to all accessory names.
     const prefix = config["prefix"] ? config["prefix"].trim() + " " : "";
-
-    const defrostService = new Service.Switch(prefix + "Defrost", "defrost");
-
-    defrostService
-      .getCharacteristic(Characteristic.On)
-      .on("get", callbackify(this.getDefrostOn))
-      .on("set", callbackify(this.setDefrostOn));
-
-    this.defrostService = defrostService;
 
     // Enable the charge port lock service; allows you to open/close the charging port.
     const chargePortService = new Service.LockMechanism(
@@ -125,16 +72,6 @@ class TeslaAccessory {
     this.homelinkService = homelinkService;
   }
 
-  getServices() {
-    return [
-      ...(this.disableDefrost ? [] : [this.defrostService]),
-      ...(this.disableCharger ? [] : [this.chargerService]),
-      ...(this.disableChargePort ? [] : [this.chargePortService]),
-      ...(this.disableStarter ? [] : [this.starterService]),
-      ...(!this.enableHomeLink ? [] : [this.homelinkService]),
-    ];
-  }
-
   //
   // HomeLink
   //
@@ -171,39 +108,6 @@ class TeslaAccessory {
       );
       this.log("HomeLink activated: ", results.result);
     } else this.log("HomeLink not available.");
-  };
-
-  //
-  // Defrost Switch
-  //
-
-  getDefrostOn = async () => {
-    const options = await this.getOptions();
-
-    if (options.isAsleep) {
-      this.logIgnored("defrost state");
-      throw new Error("Vehicle is asleep.");
-    }
-
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
-    const state: ClimateState = await api("climateState", options);
-
-    const on = state.defrost_mode;
-
-    this.log("Defrost on?", !!on);
-    return !!on;
-  };
-
-  setDefrostOn = async (on) => {
-    const options = await this.getOptions();
-
-    // Wake up, this is important!
-    await this.wakeUp(options);
-
-    this.log("Set defrost to", on);
-
-    await api("maxDefrost", options, on);
   };
 
   //

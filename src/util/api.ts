@@ -316,9 +316,11 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
       return await teslajs[name + "Async"](options, ...args);
     } catch (error: any) {
       if (error.message === "Error response: 408") {
-        console.log("Tesla timed out communicating with the vehicle.");
+        console.log(
+          `Tesla timed out communicating with the vehicle while executing "${name}".`,
+        );
       } else {
-        console.log("TeslaJS error:", error.message);
+        console.log(`TeslaJS error while executing "${name}":`, error.message);
       }
 
       throw error;
