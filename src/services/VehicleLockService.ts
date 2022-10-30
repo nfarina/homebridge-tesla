@@ -49,10 +49,9 @@ export class VehicleLockService extends TeslaPluginService {
   getTargetState(data: VehicleData | null): CharacteristicValue {
     const { hap } = this.context;
 
-    // Assume locked when not connected.
-    const locked = data ? data.vehicle_state.locked : true;
+    const currentState = this.getCurrentState(data);
 
-    return locked
+    return currentState === hap.Characteristic.LockCurrentState.SECURED
       ? hap.Characteristic.LockTargetState.SECURED
       : hap.Characteristic.LockTargetState.UNSECURED;
   }

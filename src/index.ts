@@ -1,8 +1,8 @@
 require("@babel/polyfill");
 import { AccessoryConfig, API, HAP, Logging } from "homebridge";
-import { schema } from "../config.schema.json";
 import { BatteryService } from "./services/BatteryService";
 import { ChargeLimitService } from "./services/ChargeLimitService";
+import { ClimateService } from "./services/ClimateService";
 import { ConnectionService } from "./services/ConnectionService";
 import { SentryModeService } from "./services/SentryModeService";
 import {
@@ -12,7 +12,7 @@ import {
 import { FrontTrunk, RearTrunk, TrunkService } from "./services/TrunkService";
 import { VehicleLockService } from "./services/VehicleLockService";
 import { TeslaApi } from "./util/api";
-import { TeslaPluginConfig } from "./util/types";
+import { getConfigValue, TeslaPluginConfig } from "./util/types";
 
 let hap: HAP;
 
@@ -44,26 +44,28 @@ class TeslaAccessory {
     this.services.push(new ConnectionService(context));
     this.services.push(new BatteryService(context));
 
-    const { properties } = schema;
-
-    if (config.vehicleLock ?? properties.vehicleLock.default) {
+    if (getConfigValue(config, "vehicleLock")) {
       this.services.push(new VehicleLockService(context));
     }
 
-    if (config.trunk ?? properties.trunk.default) {
+    if (getConfigValue(config, "trunk")) {
       this.services.push(new TrunkService(RearTrunk, context));
     }
 
-    if (config.frontTrunk ?? properties.frontTrunk.default) {
+    if (getConfigValue(config, "frontTrunk")) {
       this.services.push(new TrunkService(FrontTrunk, context));
     }
 
-    if (config.sentryMode ?? properties.sentryMode.default) {
-      this.services.push(new SentryModeService(context));
+    if (getConfigValue(config, "climate")) {
+      this.services.push(new ClimateService(context));
     }
 
-    if (config.chargeLimit ?? properties.chargeLimit.default) {
+    if (getConfigValue(config, "chargeLimit")) {
       this.services.push(new ChargeLimitService(context));
+    }
+
+    if (getConfigValue(config, "sentryMode")) {
+      this.services.push(new SentryModeService(context));
     }
   }
 

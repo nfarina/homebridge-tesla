@@ -29,12 +29,10 @@ class TeslaAccessory {
   longitude: number;
   disableDoors: boolean | null;
   disableChargePort: boolean | null;
-  disableClimate: boolean | null;
   disableDefrost: boolean | null;
   disableCharger: boolean | null;
   disableStarter: boolean | null;
   enableHomeLink: boolean | null;
-  disableChargeLevel: boolean | null;
 
   // Runtime state.
   authToken: string | undefined;
@@ -44,12 +42,10 @@ class TeslaAccessory {
   // Services exposed.
   lockService: any;
   chargePortService: any;
-  climateService: any;
   defrostService: any;
   chargerService: any;
   starterService: any;
   homelinkService: any;
-  chargeLevelService: any;
 
   constructor(log, config) {
     this.log = log;
@@ -62,25 +58,12 @@ class TeslaAccessory {
     this.longitude = config["longitude"];
     this.disableDoors = config["disableDoors"] || false;
     this.disableChargePort = config["disableChargePort"] || false;
-    this.disableClimate = config["disableClimate"] || false;
-    this.disableDefrost =
-      this.disableClimate || config["disableDefrost"] || false;
     this.disableCharger = config["disableCharger"] || false;
     this.disableStarter = config["disableStarter"] || false;
     this.enableHomeLink = config["enableHomeLink"] || false;
-    this.disableChargeLevel = config["disableChargeLevel"] || false;
 
     // Optional prefix to prepend to all accessory names.
     const prefix = config["prefix"] ? config["prefix"].trim() + " " : "";
-
-    const climateService = new Service.Switch(prefix + "Climate", "climate");
-
-    climateService
-      .getCharacteristic(Characteristic.On)
-      .on("get", callbackify(this.getClimateOn))
-      .on("set", callbackify(this.setClimateOn));
-
-    this.climateService = climateService;
 
     const defrostService = new Service.Switch(prefix + "Defrost", "defrost");
 
@@ -144,7 +127,6 @@ class TeslaAccessory {
 
   getServices() {
     return [
-      ...(this.disableClimate ? [] : [this.climateService]),
       ...(this.disableDefrost ? [] : [this.defrostService]),
       ...(this.disableCharger ? [] : [this.chargerService]),
       ...(this.disableChargePort ? [] : [this.chargePortService]),
@@ -189,43 +171,6 @@ class TeslaAccessory {
       );
       this.log("HomeLink activated: ", results.result);
     } else this.log("HomeLink not available.");
-  };
-
-  //
-  // Climate Switch
-  //
-
-  getClimateOn = async () => {
-    const options = await this.getOptions();
-
-    if (options.isAsleep) {
-      this.logIgnored("climate state");
-      throw new Error("Vehicle is asleep.");
-    }
-
-    // This will only succeed if the car is already online. We don't want to
-    // wake it up just to see if climate is on because that could drain battery!
-    const state: ClimateState = await api("climateState", options);
-
-    const on = state.is_climate_on;
-
-    this.log("Climate on?", on);
-    return on;
-  };
-
-  setClimateOn = async (on) => {
-    const options = await this.getOptions();
-
-    // Wake up, this is important!
-    await this.wakeUp(options);
-
-    this.log("Set climate to", on);
-
-    if (on) {
-      await api("climateStart", options);
-    } else {
-      await api("climateStop", options);
-    }
   };
 
   //

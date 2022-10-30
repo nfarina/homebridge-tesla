@@ -72,12 +72,11 @@ export class TrunkService extends TeslaPluginService {
   getTargetState(data: VehicleData | null): CharacteristicValue {
     const { hap } = this.context;
 
-    // Assume closed when not connected.
-    const opening = data ? !!data.vehicle_state.rt : false;
+    const currentState = this.getCurrentState(data);
 
-    return opening
-      ? hap.Characteristic.LockTargetState.UNSECURED
-      : hap.Characteristic.LockTargetState.SECURED;
+    return currentState === hap.Characteristic.LockCurrentState.SECURED
+      ? hap.Characteristic.LockTargetState.SECURED
+      : hap.Characteristic.LockTargetState.UNSECURED;
   }
 
   async setTargetState(state: number) {
@@ -92,18 +91,6 @@ export class TrunkService extends TeslaPluginService {
 
       // Wake up, this is important!
       await tesla.wakeUp(options);
-
-      // Try and prevent closing the trunk when you wanted to open it, and vice
-      // versa.
-      const data = await tesla.getVehicleData();
-
-      if (data) {
-        const opened = !!data.vehicle_state.rt;
-        if (opened === opening) {
-          log(`${name} already in desired state, skipping.`);
-          return;
-        }
-      }
 
       log(`Actuating the ${name}.`);
 

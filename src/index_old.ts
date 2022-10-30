@@ -1,3 +1,4 @@
+// @ts-nocheck - unported script
 require("@babel/polyfill");
 import api from "./util/api";
 import callbackify from "./util/callbackify";

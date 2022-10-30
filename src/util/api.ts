@@ -26,6 +26,10 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
   private lastVehicleData: VehicleData | null = null;
   private lastVehicleDataTime = 0;
 
+  // Keep track of how many commands are being executed at once so we don't
+  // notify event listeners until the last one is completed.
+  private commandsRunning = 0;
+
   constructor(log: Logging, config: TeslaPluginConfig) {
     super();
     this.log = log;
@@ -36,7 +40,12 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
     ignoreCache,
   }: { ignoreCache?: boolean } = {}): Promise<TeslaJSOptions> => {
     // Use a mutex to prevent multiple logins happening in parallel.
-    const unlock = await lock("getOptions", 20000);
+    const unlock = await lock("getOptions", 20_000);
+
+    if (!unlock) {
+      this.log("Failed to acquire lock for getOptions");
+      throw new Error("Failed to acquire lock for getOptions");
+    }
 
     try {
       // First login if we don't have a token.
@@ -71,7 +80,11 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
 
   getAuthToken = async (): Promise<string> => {
     // Use a mutex to prevent multiple logins happening in parallel.
-    const unlock = await lock("getAuthToken", 20000);
+    const unlock = await lock("getAuthToken", 20_000);
+
+    if (!unlock) {
+      throw new Error("Failed to acquire lock for getAuthToken");
+    }
 
     try {
       const { config, authToken, authTokenExpires, authTokenError } = this;
@@ -184,7 +197,12 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
     ignoreCache,
   }: { ignoreCache?: boolean } = {}): Promise<VehicleData | null> {
     // Use a mutex to prevent multiple calls happening in parallel.
-    const unlock = await lock("getVehicleData", 5000);
+    const unlock = await lock("getVehicleData", 20_000);
+
+    if (!unlock) {
+      this.log("Failed to acquire lock for getVehicleData");
+      return null;
+    }
 
     try {
       // If the cached value is less than 2500ms old, return it.
@@ -231,8 +249,11 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
       this.lastVehicleData = data;
       this.lastVehicleDataTime = Date.now();
 
-      // Notify any listeners.
-      this.emit("vehicleDataUpdated", data);
+      // Notify any listeners unless there is more than one command running
+      // right now.
+      if (this.commandsRunning <= 1) {
+        this.emit("vehicleDataUpdated", data);
+      }
 
       return data;
     } finally {
@@ -246,9 +267,17 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
   public async wakeAndCommand(
     func: (options: TeslaJSOptions) => Promise<void>,
   ) {
-    // We do want to wait for this to finish because it can help surface token
-    // errors to the end-user attempting to execute the command.
-    const options = await this.getOptions({ ignoreCache: true });
+    this.commandsRunning++;
+    let options: TeslaJSOptions;
+
+    try {
+      // We do want to wait for this to finish because it can help surface token
+      // errors to the end-user attempting to execute the command.
+      options = await this.getOptions({ ignoreCache: true });
+    } catch (error: any) {
+      this.commandsRunning--;
+      throw error;
+    }
 
     const background = async () => {
       try {
@@ -263,6 +292,8 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
         await this.getVehicleData({ ignoreCache: true });
       } catch (error: any) {
         this.log("Error while executing command:", error.message);
+      } finally {
+        this.commandsRunning--;
       }
     };
 

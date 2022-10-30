@@ -5,6 +5,13 @@ export type TeslaPluginConfig = {
   [key in keyof typeof schema.properties]: typeof schema.properties[key]["default"];
 };
 
+export function getConfigValue<T extends keyof TeslaPluginConfig>(
+  config: TeslaPluginConfig,
+  key: T,
+): TeslaPluginConfig[T] {
+  return config[key] ?? schema.properties[key].default;
+}
+
 //
 // Manually-inferred types for objects returned by Tesla's API
 //

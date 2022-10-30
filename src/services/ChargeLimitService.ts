@@ -60,7 +60,7 @@ export class ChargeLimitService extends TeslaPluginService {
     // Set it in 5 seconds.
     this.setLimitTimeoutId = setTimeout(() => {
       this.actuallySetLevel(value);
-    }, 5000);
+    }, 3000);
   }
 
   async actuallySetLevel(value: number) {
@@ -68,22 +68,6 @@ export class ChargeLimitService extends TeslaPluginService {
 
     await tesla.wakeAndCommand(async (options) => {
       log(`Setting charge limit to ${value}…`);
-
-      // Try and prevent setting an invalid limit.
-      const data = await tesla.getVehicleData();
-
-      if (data) {
-        const min = data.charge_state.charge_limit_soc_min;
-        const max = data.charge_state.charge_limit_soc_max;
-
-        if (value < min || value > max) {
-          log(
-            `Charge limit ${value} is outside of the allowed range ${min}–${max}.`,
-          );
-          return;
-        }
-      }
-
       await tesla.api("setChargeLimit", options, value);
     });
   }
