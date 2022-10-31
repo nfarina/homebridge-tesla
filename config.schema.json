@@ -90,6 +90,18 @@
         "type": "boolean",
         "default": false,
         "description": "Uses celsius for degrees in supported services"
+      },
+      "chargePort": {
+        "title": "Charge Port",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Open the Charge Port'"
+      },
+      "charger": {
+        "title": "Charger",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Turn on the Charger' to begin charging the car"
       }
     }
   }

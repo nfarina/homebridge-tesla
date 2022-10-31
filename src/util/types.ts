@@ -244,7 +244,7 @@ export interface VehicleData {
     charge_miles_added_rated: number; // 77,
     charge_port_cold_weather_mode: any; // null,
     charge_port_door_open: boolean; // false,
-    charge_port_latch: string; // "Engaged",
+    charge_port_latch: "Engaged" | "Disengaged";
     charge_rate: number; // 0,
     charge_to_max_range: boolean; // false,
     charger_actual_current: number; // 0,

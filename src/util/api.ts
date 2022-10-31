@@ -241,7 +241,17 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
           ignoreCache ? " (forced update)" : ""
         }…`,
       );
-      const data = await this.api("vehicleData", options);
+
+      let data: VehicleData;
+
+      try {
+        data = await this.api("vehicleData", options);
+      } catch (error: any) {
+        // Make sure these don't happen too often.
+        this.lastVehicleData = null;
+        this.lastVehicleDataTime = Date.now();
+        return null;
+      }
 
       this.log("Vehicle data updated.");
 
@@ -299,12 +309,9 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
 
     const promise = background();
 
-    // Only wait on the promise if we're already connected. Otherwise don't make
-    // the end-user wait for the car to wake up because it could take much
-    // longer than Siri's timeout and ends up being a bad experience.
-    if (!options.isAsleep) {
-      await promise;
-    }
+    // Only wait on the promise for a maximum of 5 seconds. If it takes much
+    // longer, it ends up being a bad experience.
+    await Promise.race([promise, wait(5_000)]);
   }
 
   public async api(
@@ -320,7 +327,11 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
           `Tesla timed out communicating with the vehicle while executing "${name}".`,
         );
       } else {
-        console.log(`TeslaJS error while executing "${name}":`, error.message);
+        console.log(
+          `TeslaJS error while executing "${name}":`,
+          error.message,
+          error,
+        );
       }
 
       throw error;
