@@ -8,6 +8,7 @@ import { ClimateService } from "./services/ClimateService";
 import { ConnectionService } from "./services/ConnectionService";
 import { DefrostService } from "./services/DefrostService";
 import { SentryModeService } from "./services/SentryModeService";
+import { StarterService } from "./services/StarterService";
 import { SteeringWheelHeaterService } from "./services/SteeringWheelHeaterService";
 import {
   TeslaPluginService,
@@ -86,6 +87,10 @@ class TeslaAccessory {
 
     if (getConfigValue(config, "sentryMode")) {
       this.services.push(new SentryModeService(context));
+    }
+
+    if (getConfigValue(config, "starter")) {
+      this.services.push(new StarterService(context));
     }
   }
 

@@ -102,6 +102,12 @@
         "type": "boolean",
         "default": false,
         "description": "Example: 'Turn on the Charger' to begin charging the car"
+      },
+      "starter": {
+        "title": "Starter",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Turn on the Starter' to enable keyless driving"
       }
     }
   }
