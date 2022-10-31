@@ -7,6 +7,7 @@ import { ChargerService } from "./services/ChargerService";
 import { ClimateService } from "./services/ClimateService";
 import { ConnectionService } from "./services/ConnectionService";
 import { DefrostService } from "./services/DefrostService";
+import { HomeLinkService } from "./services/HomeLinkService";
 import { SentryModeService } from "./services/SentryModeService";
 import { StarterService } from "./services/StarterService";
 import { SteeringWheelHeaterService } from "./services/SteeringWheelHeaterService";
@@ -91,6 +92,14 @@ class TeslaAccessory {
 
     if (getConfigValue(config, "starter")) {
       this.services.push(new StarterService(context));
+    }
+
+    if (
+      getConfigValue(config, "homeLink") &&
+      getConfigValue(config, "latitude") &&
+      getConfigValue(config, "longitude")
+    ) {
+      this.services.push(new HomeLinkService(context));
     }
   }
 

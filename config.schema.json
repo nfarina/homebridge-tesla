@@ -108,6 +108,24 @@
         "type": "boolean",
         "default": false,
         "description": "Example: 'Turn on the Starter' to enable keyless driving"
+      },
+      "homeLink": {
+        "title": "Homelink",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Open Homelink' to open the garage door (requires latitude and longitude set)"
+      },
+      "latitude": {
+        "title": "Latitude",
+        "type": "string",
+        "default": "",
+        "description": "Latitude of your Homelink device. Required if Homelink is enabled."
+      },
+      "longitude": {
+        "title": "Longitude",
+        "type": "string",
+        "default": "",
+        "description": "Longitude of your Homelink device. Required if Homelink is enabled."
       }
     }
   }
