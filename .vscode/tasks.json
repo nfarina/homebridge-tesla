@@ -14,7 +14,10 @@
 			"script": "dev",
 			"group": "build",
 			"label": "npm: dev",
-			"detail": "rollup -c"
+			"detail": "rollup -c",
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
 		}
 	]
 }
