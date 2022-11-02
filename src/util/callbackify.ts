@@ -1,11 +1,12 @@
-
-export default function callbackify(func: (...args: any[]) => Promise<any>): Function {
+export default function callbackify(
+  func: (...args: any[]) => Promise<any>,
+): any {
   return (...args: any[]) => {
     const onlyArgs: any[] = [];
     let maybeCallback: Function | null = null;
 
     for (const arg of args) {
-      if (typeof arg === 'function') {
+      if (typeof arg === "function") {
         maybeCallback = arg;
         break;
       }
@@ -21,6 +22,6 @@ export default function callbackify(func: (...args: any[]) => Promise<any>): Fun
 
     func(...onlyArgs)
       .then((data: any) => callback(null, data))
-      .catch((err: any) => callback(err))
-  }
+      .catch((err: any) => callback(err));
+  };
 }

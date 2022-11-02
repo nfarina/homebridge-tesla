@@ -23,11 +23,11 @@
         "default": "",
         "description": "Read the <a href='https://github.com/nfarina/homebridge-tesla'>documentation</a> to learn how to get a refresh token."
       },
-      "password": {
-        "title": "Tesla password (only required for keyless driving)",
+      "prefix": {
+        "title": "Services Prefix",
         "type": "string",
-        "required": false,
-        "default": ""
+        "default": "",
+        "description": "Prefix for all services. Useful if you have multiple Tesla vehicles. Example: 'Climate' becomes 'Model S Climate'."
       },
       "waitMinutes": {
         "title": "Time in minutes to wait for the car to wake up (default is 1 minute)",
@@ -35,70 +35,97 @@
         "default": 1,
         "maximum": 10,
         "minimum": 1,
-        "required": false,
-        "description": "Default is one (1) minute."
+        "description": "Default is one (1) minute"
+      },
+      "vehicleLock": {
+        "title": "Car Doors",
+        "type": "boolean",
+        "default": true,
+        "description": "Example: 'Unlock the Car Doors'"
+      },
+      "trunk": {
+        "title": "Trunk",
+        "type": "boolean",
+        "default": true,
+        "description": "Example: 'Open the Trunk'"
+      },
+      "frontTrunk": {
+        "title": "Front Trunk",
+        "type": "boolean",
+        "default": true,
+        "description": "Example: 'Open the Front Trunk'"
+      },
+      "sentryMode": {
+        "title": "Sentry Mode",
+        "type": "boolean",
+        "default": true,
+        "description": "Example: 'Turn on Sentry Mode'"
+      },
+      "chargeLimit": {
+        "title": "Charge Limit",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Set the Charge Limit to 80%'. NOTE: Will appear in HomeKit as a Light bulb! There's no other way to do it."
+      },
+      "climate": {
+        "title": "Climate",
+        "type": "boolean",
+        "default": true,
+        "description": "Example: 'Set the Climate to 72'"
+      },
+      "steeringWheelHeater": {
+        "title": "Steering Wheel Heater",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Turn on the Steering Wheel Heater'"
+      },
+      "defrost": {
+        "title": "Defrost",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Turn on the Defrost'"
+      },
+      "celsius": {
+        "title": "Use Celsius",
+        "type": "boolean",
+        "default": false,
+        "description": "Uses celsius for degrees in supported services"
+      },
+      "chargePort": {
+        "title": "Charge Port",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Open the Charge Port'"
+      },
+      "charger": {
+        "title": "Charger",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Turn on the Charger' to begin charging the car"
+      },
+      "starter": {
+        "title": "Starter",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Turn on the Starter' to enable keyless driving"
+      },
+      "homeLink": {
+        "title": "Homelink",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Open Homelink' to open the garage door (requires latitude and longitude set)"
       },
       "latitude": {
-        "title": "Latitude of HomeLink device",
+        "title": "Latitude",
         "type": "string",
-        "required": false,
-        "description": "This is the latitude position of your HomeLink device."
+        "default": "",
+        "description": "Latitude of your Homelink device. Required if Homelink is enabled."
       },
       "longitude": {
-        "title": "Longitude of HomeLink device",
+        "title": "Longitude",
         "type": "string",
-        "required": false,
-        "description": "This is the longitude position of your HomeLink device."
-      },
-      "disableDoors": {
-        "title": "Disable Door Lock Service",
-        "type": "boolean"
-      },
-      "disableSentryMode": {
-        "title": "Disable Sentry Mode Service",
-        "type": "boolean"
-      },
-      "sentryModeSwitch": {
-        "title": "Sentry Mode Service as a Switch",
-        "type": "boolean",
-        "description": "This will configure Sentry Mode as a switch, instead of a lock."
-      },
-      "disableClimate": {
-        "title": "Disable Climate Control Service",
-        "type": "boolean"
-      },
-      "disableDefrost": {
-        "title": "Disable Defrost Control Service",
-        "type": "boolean",
-        "description": "If climate control service is disabled, this switch will also be disabled."
-      },
-      "disableTrunk": {
-        "title": "Disable Trunk Service",
-        "type": "boolean"
-      },
-      "disableFrunk": {
-        "title": "Disable Frunk Service",
-        "type": "boolean"
-      },
-      "disableCharger": {
-        "title": "Disable Charger Service",
-        "type": "boolean"
-      },
-      "disableChargePort": {
-        "title": "Disable Charge Port Service",
-        "type": "boolean"
-      },
-      "disableStarter": {
-        "title": "Disable Starter Service",
-        "type": "boolean"
-      },
-      "enableHomeLink": {
-        "title": "Enable HomeLink Service",
-        "type": "boolean"
-      },
-      "disableChargeLevel": {
-        "title": "Disable Charge Level Service",
-        "type": "boolean"
+        "default": "",
+        "description": "Longitude of your Homelink device. Required if Homelink is enabled."
       }
     }
   }

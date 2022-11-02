@@ -1,3 +1,21 @@
+import { schema } from "../../config.schema.json";
+
+// Maps the type definition of config.schema.json to an actual TypeScript type.
+export type TeslaPluginConfig = {
+  [key in keyof typeof schema.properties]: typeof schema.properties[key]["default"];
+};
+
+export function getConfigValue<T extends keyof TeslaPluginConfig>(
+  config: TeslaPluginConfig,
+  key: T,
+): TeslaPluginConfig[T] {
+  return config[key] ?? schema.properties[key].default;
+}
+
+//
+// Manually-inferred types for objects returned by Tesla's API
+//
+
 export interface Vehicle {
   id: number;
   vehicle_id: number;
@@ -226,7 +244,7 @@ export interface VehicleData {
     charge_miles_added_rated: number; // 77,
     charge_port_cold_weather_mode: any; // null,
     charge_port_door_open: boolean; // false,
-    charge_port_latch: string; // "Engaged",
+    charge_port_latch: "Engaged" | "Disengaged";
     charge_rate: number; // 0,
     charge_to_max_range: boolean; // false,
     charger_actual_current: number; // 0,
@@ -299,6 +317,7 @@ export interface VehicleData {
     is_preconditioning: boolean; // false,
     is_rear_defroster_on: boolean; // false,
     left_temp_direction: number; // 536,
+    defrost_mode: number; // 0 or 2 (that I've seen),
     max_avail_temp: number; // 28,
     min_avail_temp: number; // 15,
     outside_temp: number; // -2.5,
@@ -358,6 +377,7 @@ export interface VehicleData {
     timestamp: number; // 1549475000612,
     valet_mode: boolean; // false,
     vehicle_name: string; // "Tessie",
+    sentry_mode: boolean; // false,
   };
 }
 

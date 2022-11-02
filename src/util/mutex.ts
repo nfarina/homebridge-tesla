@@ -6,15 +6,15 @@ export const queue: Map<MutexValue, ProcessFunction[]> = new Map();
 
 const debug = (...args: any[]) => {
   //console.log(...args);
-}
+};
 
 export async function lock(
   value: MutexValue,
   timeout: number,
-): Promise<UnlockFunction> {
+): Promise<UnlockFunction | null> {
   debug(`Locking on ${value}`);
 
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     let timeoutID;
 
     // Get either the existing wait list or a new one.
