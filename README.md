@@ -75,7 +75,7 @@ You'll need to manually tap into each service tile and change its name back to w
 
 Additionally, you'll find that when you tap into the car in the Home app to, say, open the trunk, you'll see a big scrolling page of switches and locks with _no labels_. This is just what the Home app does.
 
-To improve this, you can create a new "Room" in HomeKit for each car. So you might have a "Model Y" room, and you can place your Model Y accessory inside there. Then you can configure it to "Show as separate tiles" and you get this lovely presentation of all your widgets in the "room".
+To improve this, you can create a new "Room" in HomeKit for each car. So you might have a "Model Y" room, and you can place your Model Y accessory inside there. Then you can configure it to "Show as separate tiles" and you get this lovely presentation of all your widgets in the "room" (pictured at top).
 
 Here's a [video demonstrating the complete setup process as of iOS 16](https://youtu.be/sgDJmwwSOYA).
 
