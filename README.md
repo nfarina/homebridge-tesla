@@ -53,7 +53,7 @@ Example config.json:
 
 To enable and disable services, you'll need to add more options. For example, to disable the Sentry Mode switch:
 
-```json
+```yaml
   …
   "refreshToken": "eyJhbGciOiJSUzI1…",
   "sentryMode": false // Add this line
@@ -139,7 +139,7 @@ For vehicles with HomeLink support, the plugin allows you to enable the feature 
 
 Once that is done, you can issue commands like "Open the HomeLink". If you don't have any other garage doors in HomeKit, you may also be able to just say "Open the garage door" since it's exposed as a true garage door service.
 
-```json
+```yaml
   …
   "refreshToken": "…",
   "enableHomeLink": true,
