@@ -12,7 +12,7 @@ After [installation](#installation) below, you'll get the default services enabl
 - _"Open the trunk"_
 - _"Open the front trunk"_
 - _"Set the climate to 72 degrees"_ (turns on climate control if off)
-- _"Turn off sentry mode"_
+- _"Turn on sentry mode"_
 
 You can also configure the plugin to enable these additional services:
 
@@ -24,7 +24,7 @@ You can also configure the plugin to enable these additional services:
 - _"Turn on the starter"_ (enables keyless driving)
 - _"Open HomeLink"_ (opens your garage or other door via HomeLink in supported vehicles)
 
-**NOTE:** The "charge limit" service is exposed as a "Light Bulb" in HomeKit. This is the only way to get something Siri can control as a percentage value.
+**NOTE:** The "charge limit" service is exposed as a "Lightbulb" in HomeKit. This is the only way to get something Siri can control as a percentage value.
 
 # Installation
 
@@ -67,7 +67,7 @@ You can find the full list of configuration settings in [`config.schema.json`](c
 
 The plugin exposes a single HomeKit "Accessory" representing the car, which contains multiple services for all the different switches and locks. _This is the way._
 
-Unfortunately, there is a _very annoying_ [known bug](https://github.com/homebridge/homebridge/issues/3210) with iOS 16 where, when adding accessories with multiple services, the services are all given the same name as the main accessory.
+Unfortunately, there is a very annoying [known bug](https://github.com/homebridge/homebridge/issues/3210) with iOS 16 where, when adding accessories with multiple services, the services are all given the same name as the main accessory.
 
 This means that if your accessory (car) name is "Model Y", then (for instance) the trunk service will be renamed to "Model Y". And you'll say "open the trunk" and Siri will say "I don't know what you mean."
 
@@ -93,7 +93,7 @@ I've found that commands almost always succeed. If they fail a lot for you, you 
 
 Asking Siri about your car, like "What's the charge level?" or "Is the trunk open?" will _not_ wake up the car. This is because Siri asks a lot in the background and we don't want this to impact the car's battery life.
 
-If you ask your car if the trunk is open, and the car is awake already, the plugin will query the car and you'll get the right answer. If the car is asleep, the plugin will return the last-known value, which may be wrong.
+If you ask Siri if the trunk is open, and the car is awake already, the plugin will query the car and you'll get the right answer. If the car is asleep, the plugin will return the last-known value, which may be wrong.
 
 If you require the correct answer, you'll need to wake the car up first. You can do this by turning on the special "Connection" switch. This switch is not subject to the default five-second timeout, so if Siri thinks the switch is on, it's on for real and you can read accurate data about the car.
 
