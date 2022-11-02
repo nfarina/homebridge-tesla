@@ -10,7 +10,7 @@ After [installation](#installation) below, you'll get the default services enabl
 
 - _"Unlock the car doors"_ (unlock the vehicle)
 - _"Open the trunk"_
-- _"Open front trunk"_
+- _"Open the front trunk"_
 - _"Set the climate to 72 degrees"_ (turns on climate control if off)
 - _"Turn off sentry mode"_
 
