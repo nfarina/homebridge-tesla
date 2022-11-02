@@ -56,7 +56,7 @@ To enable and disable services, you'll need to add more options. For example, to
 ```yaml
   …
   "refreshToken": "eyJhbGciOiJSUzI1…",
-  # Added
+  # Add this:
   "sentryMode": false
 }
 ```
