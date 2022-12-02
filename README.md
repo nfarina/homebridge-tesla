@@ -72,6 +72,7 @@ Unfortunately, there is a very annoying [known bug](https://github.com/homebridg
 This means that if your accessory (car) name is "Model Y", then (for instance) the trunk service will be renamed to "Model Y". And you'll say "open the trunk" and Siri will say "I don't know what you mean."
 
 You'll need to manually tap into each service tile and change its name back to what you want.
+**NOTE** Tapping "X" on the accessory name will display the true name.
 
 Additionally, you'll find that when you tap into the car in the Home app to, say, open the trunk, you'll see a big scrolling page of switches and locks with _no labels_. This is just what the Home app does.
 
