@@ -108,11 +108,11 @@ export class ClimateService extends TeslaPluginService {
   }
 
   getCurrentTemperature(data: VehicleData | null): CharacteristicValue {
-    return data?.climate_state.inside_temp ?? 0;
+    return data?.climate_state.inside_temp ?? 10;
   }
 
   getTargetTemp(data: VehicleData | null): CharacteristicValue {
-    return data?.climate_state.driver_temp_setting ?? 0;
+    return data?.climate_state.driver_temp_setting ?? 10;
   }
 
   async setTargetTemp(value: number) {
