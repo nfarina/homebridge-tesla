@@ -100,7 +100,8 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
       }
 
       this.log("Exchanging refresh token for an access token…");
-      const response = await getAccessToken(refreshToken);
+      const china = this.config.china;
+      const response = await getAccessToken(refreshToken, { china });
 
       if (response.error) {
         // Probably an invalid refresh token.

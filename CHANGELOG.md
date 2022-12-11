@@ -1,3 +1,11 @@
+## Version 4.0.2
+
+- Add possible fix for refresh tokens for vehicles in China.
+
+## Version 4.0.1
+
+- Fix "invalid target temperature" warning on newer Homebridge versions by using 10 instead of 0 as the default target temp value when the real value is not known.
+
 ## Version 4.0.0
 
 - Complete plugin rewrite

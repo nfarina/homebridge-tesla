@@ -12,11 +12,16 @@ const request = require("request").defaults({
   body: {},
 });
 
-export async function getAccessToken(refreshToken: string): Promise<any> {
+export async function getAccessToken(
+  refreshToken: string,
+  { china }: { china?: boolean },
+): Promise<any> {
   return new Promise((resolve, reject) => {
+    const server = china ? "auth.tesla.cn" : "auth.tesla.com";
+
     var req = {
       method: "POST",
-      url: "https://auth.tesla.com/oauth2/v3/token",
+      url: `https://${server}/oauth2/v3/token`,
       json: true,
       body: {
         grant_type: "refresh_token",

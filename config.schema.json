@@ -126,6 +126,12 @@
         "type": "string",
         "default": "",
         "description": "Longitude of your Homelink device. Required if Homelink is enabled."
+      },
+      "china": {
+        "title": "Use China Authentication Servers",
+        "type": "boolean",
+        "default": false,
+        "description": "Experimental flag for users in China."
       }
     }
   }
