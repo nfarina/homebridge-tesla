@@ -1,3 +1,7 @@
+## Version 4.1.0
+
+- Add option to expose climate service as a simple switch instead of a thermostat.
+
 ## Version 4.0.2
 
 - Add possible fix for refresh tokens for vehicles in China.

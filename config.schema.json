@@ -73,6 +73,12 @@
         "default": true,
         "description": "Example: 'Set the Climate to 72'"
       },
+      "climateSwitch": {
+        "title": "Climate Switch",
+        "type": "boolean",
+        "default": false,
+        "description": "If on, climate will be controlled by a switch instead of a thermostat. NOTE: This will not allow you to set a temperature."
+      },
       "steeringWheelHeater": {
         "title": "Steering Wheel Heater",
         "type": "boolean",

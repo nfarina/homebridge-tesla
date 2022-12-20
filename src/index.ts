@@ -5,6 +5,7 @@ import { ChargeLimitService } from "./services/ChargeLimitService";
 import { ChargePortService } from "./services/ChargePortServices";
 import { ChargerService } from "./services/ChargerService";
 import { ClimateService } from "./services/ClimateService";
+import { ClimateSwitchService } from "./services/ClimateSwitchService";
 import { ConnectionService } from "./services/ConnectionService";
 import { DefrostService } from "./services/DefrostService";
 import { HomeLinkService } from "./services/HomeLinkService";
@@ -63,7 +64,11 @@ class TeslaAccessory {
     }
 
     if (getConfigValue(config, "climate")) {
-      this.services.push(new ClimateService(context));
+      if (getConfigValue(config, "climateSwitch")) {
+        this.services.push(new ClimateSwitchService(context));
+      } else {
+        this.services.push(new ClimateService(context));
+      }
     }
 
     if (getConfigValue(config, "steeringWheelHeater")) {
