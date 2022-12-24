@@ -1,10 +1,10 @@
 require("@babel/polyfill");
-import { ChargingAmpsService } from ".services/ChargingAmpsService";
 import { AccessoryConfig, API, HAP, Logging } from "homebridge";
 import { BatteryService } from "./services/BatteryService";
 import { ChargeLimitService } from "./services/ChargeLimitService";
 import { ChargePortService } from "./services/ChargePortServices";
 import { ChargerService } from "./services/ChargerService";
+import { ChargingAmpsService } from "./services/ChargingAmpsService";
 import { ClimateService } from "./services/ClimateService";
 import { ClimateSwitchService } from "./services/ClimateSwitchService";
 import { ConnectionService } from "./services/ConnectionService";
