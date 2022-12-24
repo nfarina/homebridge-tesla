@@ -17,6 +17,7 @@ After [installation](#installation) below, you'll get the default services enabl
 You can also configure the plugin to enable these additional services:
 
 - _"Set the charge limit to 80%"_
+- _"Set the charge amps to 24"_
 - _"Turn on the steering wheel heater"_
 - _"Turn on the defrost"_
 - _"Open the charge port"_

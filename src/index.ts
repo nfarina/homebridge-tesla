@@ -14,7 +14,7 @@ import { StarterService } from "./services/StarterService";
 import { SteeringWheelHeaterService } from "./services/SteeringWheelHeaterService";
 import {
   TeslaPluginService,
-  TeslaPluginServiceContext,
+  TeslaPluginServiceContext
 } from "./services/TeslaPluginService";
 import { FrontTrunk, RearTrunk, TrunkService } from "./services/TrunkService";
 import { VehicleLockService } from "./services/VehicleLockService";
@@ -85,6 +85,10 @@ class TeslaAccessory {
 
     if (getConfigValue(config, "charger")) {
       this.services.push(new ChargerService(context));
+    }
+
+    if (getConfigValue(config, "chargingAmps")) {
+      this.services.push(new ChargingAmpsService(context));
     }
 
     if (getConfigValue(config, "defrost")) {
