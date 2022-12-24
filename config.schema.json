@@ -109,6 +109,14 @@
         "default": false,
         "description": "Example: 'Turn on the Charger' to begin charging the car"
       },
+      "chargingAmps": {
+        "title": "Charging Amps",
+        "type": "integer",
+        "default": 12,
+        "maximum": 48,
+        "minimum": 6,
+        "description": "Example: 'Set the charging amps to 24'"
+      },
       "starter": {
         "title": "Starter",
         "type": "boolean",

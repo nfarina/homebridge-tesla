@@ -1,7 +1,7 @@
 {
   "name": "homebridge-teslala",
-  "version": "4.1.0",
-  "description": "Tesla support for Homebridge: https://github.com/rlisle/homebridge",
+  "version": "1.0.0",
+  "description": "Tesla support for Homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
     "homebridge-plugin"
