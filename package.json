@@ -1,6 +1,6 @@
 {
-  "name": "homebridge-teslala",
-  "version": "1.0.0",
+  "name": "homebridge-tesla",
+  "version": "4.1.0",
   "description": "Tesla support for Homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -8,10 +8,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/rlisle/homebridge-tesla.git"
+    "url": "git://github.com/nfarina/homebridge-tesla.git"
   },
   "bugs": {
-    "url": "http://github.com/rlisle/homebridge-tesla/issues"
+    "url": "http://github.com/nfarina/homebridge-tesla/issues"
   },
   "engines": {
     "node": ">=0.12.0",
