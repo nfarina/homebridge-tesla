@@ -111,11 +111,9 @@
       },
       "chargingAmps": {
         "title": "Charging Amps",
-        "type": "integer",
-        "default": 12,
-        "maximum": 48,
-        "minimum": 6,
-        "description": "Example: 'Set the charging amps to 24'"
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Set the Charging amps to 24'. NOTE: Will appear in HomeKit as a Light bulb! There's no other way to do it."
       },
       "starter": {
         "title": "Starter",
