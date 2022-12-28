@@ -109,6 +109,12 @@
         "default": false,
         "description": "Example: 'Turn on the Charger' to begin charging the car"
       },
+      "chargingAmps": {
+        "title": "Charging Amps",
+        "type": "boolean",
+        "default": false,
+        "description": "Example: 'Set the Charging amps to 24'. NOTE: Will appear in HomeKit as a Light bulb! There's no other way to do it."
+      },
       "starter": {
         "title": "Starter",
         "type": "boolean",
