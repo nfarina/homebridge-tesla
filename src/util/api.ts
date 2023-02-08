@@ -62,11 +62,9 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
       // Grab the string ID of your vehicle and the current state.
       const { id_s: vehicleID, state } = await this.getVehicle();
 
-      const options = { authToken, vehicleID, isAsleep: state === "asleep" };
+      const options = { authToken, vehicleID, isOnline: state === "online" };
 
-      this.log(
-        `Tesla reports vehicle is ${options.isAsleep ? "sleeping" : "awake"}.`,
-      );
+      this.log(`Tesla reports vehicle is ${state}.`);
 
       // Cache the state.
       this.lastOptions = options;
@@ -158,9 +156,9 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
   };
 
   wakeUp = async (options: TeslaJSOptions) => {
-    // Is the car awake already?
-    if (!options.isAsleep) {
-      this.log("Vehicle is awake.");
+    // Is the car online already?
+    if (options.isOnline) {
+      this.log("Vehicle is online.");
       return;
     }
 
@@ -180,7 +178,7 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
 
       if (state === "online") {
         // Success!
-        this.log("Vehicle is now awake.");
+        this.log("Vehicle is now online.");
         return;
       }
 
@@ -216,20 +214,20 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
 
       const options = await this.getOptions({ ignoreCache });
 
-      if (options.isAsleep) {
+      if (!options.isOnline) {
         // If we're ignoring cache, we'll have to return null here.
         if (ignoreCache) {
           return null;
         }
 
         this.log(
-          `Vehicle is asleep; using ${
+          `Vehicle is not online; using ${
             this.lastVehicleData ? "last known" : "default"
           } state.`,
         );
 
         // Set the last update time to now to prevent spamming the logs with the
-        // directly-above message. If the vehicle becomes awake, we'll get
+        // directly-above message. If the vehicle becomes online, we'll get
         // called with ignoreCache=true anyway.
         this.lastVehicleDataTime = Date.now();
 
@@ -292,7 +290,7 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
 
     const background = async () => {
       try {
-        if (options.isAsleep) {
+        if (!options.isOnline) {
           await this.wakeUp(options);
         }
 
@@ -343,7 +341,7 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
 interface TeslaJSOptions {
   authToken: string;
   vehicleID: string;
-  isAsleep: boolean;
+  isOnline: boolean;
 }
 
 // teslajs.setLogLevel(tesla.API_LOG_ALL);

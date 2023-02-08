@@ -24,7 +24,7 @@ export interface Vehicle {
   option_codes: string;
   color: any;
   tokens: string[];
-  state: "online" | "asleep";
+  state: "online" | "asleep" | "offline" | "waking" | "unknown";
   in_service: boolean;
   id_s: string;
   calendar_enabled: boolean;

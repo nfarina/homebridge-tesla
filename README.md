@@ -95,7 +95,7 @@ I've found that commands almost always succeed. If they fail a lot for you, you 
 
 Asking Siri about your car, like "What's the charge level?" or "Is the trunk open?" will _not_ wake up the car. This is because Siri asks a lot in the background and we don't want this to impact the car's battery life.
 
-If you ask Siri if the trunk is open, and the car is awake already, the plugin will query the car and you'll get the right answer. If the car is asleep, the plugin will return the last-known value, which may be wrong.
+If you ask Siri if the trunk is open, and the car is online already, the plugin will query the car and you'll get the right answer. If the car is not online, the plugin will return the last-known value, which may be wrong.
 
 If you require the correct answer, you'll need to wake the car up first. You can do this by turning on the special "Connection" switch. This switch is not subject to the default five-second timeout, so if Siri thinks the switch is on, it's on for real and you can read accurate data about the car.
 
@@ -153,7 +153,7 @@ Once that is done, you can issue commands like "Open the HomeLink". If you don't
 
 ## Charge Level
 
-The car can supply the current charge level of the battery as a percentage. As with the other services, this will only update if the car is awake.
+The car can supply the current charge level of the battery as a percentage. As with the other services, this will only update if the car is online.
 
 Note that asking Siri about the "battery level" or "charge level" of anything will usually result in Siri telling you the battery level of your phone. Instead, you can ask Siri "Is the Model 3 charging?" and the level should be returned in the reply.
 
