@@ -157,6 +157,17 @@ The car can supply the current charge level of the battery as a percentage. As w
 
 Note that asking Siri about the "battery level" or "charge level" of anything will usually result in Siri telling you the battery level of your phone. Instead, you can ask Siri "Is the Model 3 charging?" and the level should be returned in the reply.
 
+## Climate Switch
+
+By default, the climate control is exposed as a "HVAC" accessory similar to a thermostat in your home. This allows you to say things like "Set the climate to 69 degrees." If you don't need this level of control, you may prefer to expose the climate control as a simple switch. This allows you to say things like "Turn on the climate control" or "Turn off the climate control." The temperature setting will be whatever the car is already set to.
+
+```yaml
+  …
+  "refreshToken": "…",
+  "climateSwitch": true
+}
+```
+
 ## Development
 
 You can run Rollup in watch mode to automatically transpile code as you write it:

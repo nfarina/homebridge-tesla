@@ -1,3 +1,7 @@
+## Version 4.2.0
+
+- Handle "offline" state in addition to "asleep" (Fixes #109)
+
 ## Version 4.1.0
 
 - Add option to expose climate service as a simple switch instead of a thermostat.
