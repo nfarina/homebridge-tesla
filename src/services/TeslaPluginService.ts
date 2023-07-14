@@ -20,21 +20,20 @@ export type TeslaPluginServiceContext = {
 export abstract class TeslaPluginService {
   protected context: TeslaPluginServiceContext;
   public abstract service: Service;
+  public serviceName: string;
 
-  constructor(context: TeslaPluginServiceContext) {
+  constructor(context: TeslaPluginServiceContext, baseName: string) {
     this.context = context;
-  }
 
-  protected serviceName(name: string): string {
-    const { config } = this.context;
+    const { config } = context;
 
     // Optional prefix to prepend to all accessory names.
     const prefix = (config.prefix ?? "").trim();
 
     if (prefix.length > 0) {
-      return `${prefix} ${name}`;
+      this.serviceName = `${prefix} ${baseName}`;
     } else {
-      return name;
+      this.serviceName = baseName;
     }
   }
 

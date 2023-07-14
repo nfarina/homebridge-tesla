@@ -31,13 +31,13 @@ export class TrunkService extends TeslaPluginService {
   service: Service;
 
   constructor(trunk: Trunk, context: TeslaPluginServiceContext) {
-    super(context);
+    super(context, trunk.name);
     this.trunk = trunk;
 
     const { hap, tesla } = context;
 
     const service = new hap.Service.LockMechanism(
-      this.serviceName(trunk.name),
+      this.serviceName,
       trunk.subtype,
     );
 

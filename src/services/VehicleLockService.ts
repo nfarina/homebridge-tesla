@@ -10,13 +10,10 @@ export class VehicleLockService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context);
+    super(context, "Car Doors");
     const { hap, tesla } = context;
 
-    const service = new hap.Service.LockMechanism(
-      this.serviceName("Car Doors"),
-      "carDoors",
-    );
+    const service = new hap.Service.LockMechanism(this.serviceName, "carDoors");
 
     const currentState = service
       .getCharacteristic(hap.Characteristic.LockCurrentState)

@@ -68,18 +68,11 @@ You can find the full list of configuration settings in [`config.schema.json`](c
 
 The plugin exposes a single HomeKit "Accessory" representing the car, which contains multiple services for all the different switches and locks. _This is the way._
 
-Unfortunately, there is a very annoying [known bug](https://github.com/homebridge/homebridge/issues/3210) with iOS 16 where, when adding accessories with multiple services, the services are all given the same name as the main accessory.
-
-This means that if your accessory (car) name is "Model Y", then (for instance) the trunk service will be renamed to "Model Y". And you'll say "open the trunk" and Siri will say "I don't know what you mean."
-
-You'll need to manually tap into each service tile and change its name back to what you want.
-**NOTE** Tapping "X" on the accessory name will display the true name.
-
-Additionally, you'll find that when you tap into the car in the Home app to, say, open the trunk, you'll see a big scrolling page of switches and locks with _no labels_. This is just what the Home app does.
+After adding the accessory, you'll find that when you tap into the car in the Home app to, say, open the trunk, you'll see a big scrolling page of switches and locks with _no labels_. This is just what the Home app does.
 
 To improve this, you can create a new "Room" in HomeKit for each car. So you might have a "Model Y" room, and you can place your Model Y accessory inside there. Then you can configure it to "Show as separate tiles" and you get this lovely presentation of all your widgets in the "room" (pictured at top).
 
-Here's a [video demonstrating the complete setup process as of iOS 16](https://youtu.be/sgDJmwwSOYA).
+Here's a [video demonstrating the complete setup process as of iOS 16](https://youtu.be/sgDJmwwSOYA). **NOTE**: ignore the part where I'm renaming the services for seemingly no reason - that was to work around a [bug](https://github.com/homebridge/homebridge/issues/3210) that is now fixed.
 
 ## Waking the Car Up
 

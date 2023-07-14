@@ -10,11 +10,11 @@ export class ChargePortService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context);
+    super(context, "Charge Port");
     const { hap, tesla } = context;
 
     const service = new hap.Service.LockMechanism(
-      this.serviceName("Charge Port"),
+      this.serviceName,
       "chargePort",
     );
 

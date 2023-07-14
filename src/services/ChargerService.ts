@@ -9,13 +9,10 @@ export class ChargerService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context);
+    super(context, "Charger");
     const { hap, tesla } = context;
 
-    const service = new hap.Service.Switch(
-      this.serviceName("Charger"),
-      "charger",
-    );
+    const service = new hap.Service.Switch(this.serviceName, "charger");
 
     const on = service
       .getCharacteristic(hap.Characteristic.On)

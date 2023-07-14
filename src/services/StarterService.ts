@@ -9,13 +9,10 @@ export class StarterService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context);
+    super(context, "Starter");
     const { hap, tesla } = context;
 
-    const service = new hap.Service.Switch(
-      this.serviceName("Starter"),
-      "starter",
-    );
+    const service = new hap.Service.Switch(this.serviceName, "starter");
 
     const on = service
       .getCharacteristic(hap.Characteristic.On)

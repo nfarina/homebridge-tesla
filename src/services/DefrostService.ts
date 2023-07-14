@@ -9,13 +9,10 @@ export class DefrostService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context);
+    super(context, "Defrost");
     const { hap, tesla } = context;
 
-    const service = new hap.Service.Switch(
-      this.serviceName("Defrost"),
-      "defrost",
-    );
+    const service = new hap.Service.Switch(this.serviceName, "defrost");
 
     const on = service
       .getCharacteristic(hap.Characteristic.On)

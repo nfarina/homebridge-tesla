@@ -9,11 +9,11 @@ export class SteeringWheelHeaterService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context);
+    super(context, "Steering Wheel Heater");
     const { hap, tesla } = context;
 
     const service = new hap.Service.Switch(
-      this.serviceName("Steering Wheel Heater"),
+      this.serviceName,
       "steeringWheelHeater",
     );
 

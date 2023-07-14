@@ -1,5 +1,6 @@
 require("@babel/polyfill");
 import { AccessoryConfig, API, HAP, Logging } from "homebridge";
+import { BatteryLevelService } from "./services/BatteryLevelService";
 import { BatteryService } from "./services/BatteryService";
 import { ChargeLimitService } from "./services/ChargeLimitService";
 import { ChargePortService } from "./services/ChargePortServices";
@@ -15,7 +16,7 @@ import { StarterService } from "./services/StarterService";
 import { SteeringWheelHeaterService } from "./services/SteeringWheelHeaterService";
 import {
   TeslaPluginService,
-  TeslaPluginServiceContext
+  TeslaPluginServiceContext,
 } from "./services/TeslaPluginService";
 import { FrontTrunk, RearTrunk, TrunkService } from "./services/TrunkService";
 import { VehicleLockService } from "./services/VehicleLockService";
@@ -80,6 +81,10 @@ class TeslaAccessory {
       this.services.push(new ChargeLimitService(context));
     }
 
+    if (getConfigValue(config, "batteryLevel")) {
+      this.services.push(new BatteryLevelService(context));
+    }
+
     if (getConfigValue(config, "chargePort")) {
       this.services.push(new ChargePortService(context));
     }
@@ -110,6 +115,14 @@ class TeslaAccessory {
       getConfigValue(config, "longitude")
     ) {
       this.services.push(new HomeLinkService(context));
+    }
+
+    // Add the "ConfiguredName" characteristic to every service so that you get
+    // these as default names when adding the accessory.
+    for (const teslaService of this.services) {
+      const { service, serviceName } = teslaService;
+      service.addOptionalCharacteristic(hap.Characteristic.ConfiguredName);
+      service.setCharacteristic(hap.Characteristic.ConfiguredName, serviceName);
     }
   }
 
