@@ -9,10 +9,13 @@ export class BatteryLevelService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context, "Battery Level");
+    super(context);
     const { hap, tesla } = context;
 
-    const service = new hap.Service.Lightbulb(this.serviceName, "batteryLevel");
+    const service = new hap.Service.Lightbulb(
+      this.serviceName("Battery Level"),
+      "batteryLevel",
+    );
 
     const on = service
       .getCharacteristic(hap.Characteristic.On)
