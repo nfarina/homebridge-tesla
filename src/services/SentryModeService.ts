@@ -9,10 +9,13 @@ export class SentryModeService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context, "Sentry Mode");
+    super(context);
     const { hap, tesla } = context;
 
-    const service = new hap.Service.Switch(this.serviceName, "sentryMode");
+    const service = new hap.Service.Switch(
+      this.serviceName("Sentry Mode"),
+      "sentryMode",
+    );
 
     const on = service
       .getCharacteristic(hap.Characteristic.On)

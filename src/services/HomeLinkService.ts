@@ -10,11 +10,11 @@ export class HomeLinkService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context, "HomeLink");
+    super(context);
     const { hap, tesla } = context;
 
     const service = new hap.Service.GarageDoorOpener(
-      this.serviceName,
+      this.serviceName("HomeLink"),
       "homeLink",
     );
 

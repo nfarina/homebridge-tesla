@@ -8,10 +8,13 @@ export class ConnectionService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context, "Connection");
+    super(context);
     const { hap } = context;
 
-    const service = new hap.Service.Switch(this.serviceName, "connection");
+    const service = new hap.Service.Switch(
+      this.serviceName("Connection"),
+      "connection",
+    );
 
     service
       .getCharacteristic(hap.Characteristic.On)

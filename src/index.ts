@@ -116,14 +116,6 @@ class TeslaAccessory {
     ) {
       this.services.push(new HomeLinkService(context));
     }
-
-    // Add the "ConfiguredName" characteristic to every service so that you get
-    // these as default names when adding the accessory.
-    for (const teslaService of this.services) {
-      const { service, serviceName } = teslaService;
-      service.addOptionalCharacteristic(hap.Characteristic.ConfiguredName);
-      service.setCharacteristic(hap.Characteristic.ConfiguredName, serviceName);
-    }
   }
 
   getServices() {

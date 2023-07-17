@@ -9,10 +9,13 @@ export class ClimateSwitchService extends TeslaPluginService {
   service: Service;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context, "Climate");
+    super(context);
     const { config, hap, tesla } = context;
 
-    const service = new hap.Service.Switch(this.serviceName, "climate");
+    const service = new hap.Service.Switch(
+      this.serviceName("Climate"),
+      "climate",
+    );
 
     const on = service
       .getCharacteristic(hap.Characteristic.On)

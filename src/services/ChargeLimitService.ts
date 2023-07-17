@@ -16,10 +16,13 @@ export class ChargeLimitService extends TeslaPluginService {
   setLimitTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(context: TeslaPluginServiceContext) {
-    super(context, "Charge Limit");
+    super(context);
     const { hap, tesla } = context;
 
-    const service = new hap.Service.Lightbulb(this.serviceName, "chargeLimit");
+    const service = new hap.Service.Lightbulb(
+      this.serviceName("Charge Limit"),
+      "chargeLimit",
+    );
 
     const on = service
       .getCharacteristic(hap.Characteristic.On)
