@@ -1,7 +1,7 @@
 require("@babel/polyfill");
 import { AccessoryConfig, API, HAP, Logging } from "homebridge";
-import { BatteryLevelService } from "./services/BatteryLevelService";
 import { BatteryService } from "./services/BatteryService";
+import { ChargeLevelService } from "./services/ChargeLevelService";
 import { ChargeLimitService } from "./services/ChargeLimitService";
 import { ChargePortService } from "./services/ChargePortServices";
 import { ChargerService } from "./services/ChargerService";
@@ -81,8 +81,8 @@ class TeslaAccessory {
       this.services.push(new ChargeLimitService(context));
     }
 
-    if (getConfigValue(config, "batteryLevel")) {
-      this.services.push(new BatteryLevelService(context));
+    if (getConfigValue(config, "chargeLevel")) {
+      this.services.push(new ChargeLevelService(context));
     }
 
     if (getConfigValue(config, "chargePort")) {

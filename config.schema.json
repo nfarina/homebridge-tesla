@@ -67,8 +67,8 @@
         "default": false,
         "description": "Example: 'Set the Charge Limit to 80%'. NOTE: Will appear in HomeKit as a Light bulb! There's no other way to do it."
       },
-      "batteryLevel": {
-        "title": "Battery Level",
+      "chargeLevel": {
+        "title": "Charge Level",
         "type": "boolean",
         "default": false,
         "description": "Creates a read-only light bulb representing the current battery level. Useful for automations. NOTE: Will appear in HomeKit as a Light bulb! There's no other way to do it."
