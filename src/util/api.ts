@@ -169,7 +169,7 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
 
     // Wait up to 30 seconds for the car to wake up.
     const start = Date.now();
-    let waitTime = 1000;
+    let waitTime = 2000;
     const waitMinutes = this.config.waitMinutes || 1;
 
     while (Date.now() - start < waitMinutes * 60 * 1000) {
@@ -185,8 +185,8 @@ export class TeslaApi extends EventEmitter<TeslaApiEvents> {
       this.log("Waiting for vehicle to wake up...");
       await wait(waitTime);
 
-      // Use exponential backoff with a max wait of 5 seconds.
-      waitTime = Math.min(waitTime * 2, 5000);
+      // Use exponential backoff with a max wait of 10 seconds.
+      waitTime = Math.min(waitTime * 2, 10_000);
     }
 
     throw new Error(`Vehicle did not wake up within ${waitMinutes} minutes.`);
