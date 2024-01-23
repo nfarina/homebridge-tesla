@@ -1,3 +1,7 @@
+> [!CAUTION]
+> This plugin currently does not work. Tesla has removed the REST API that this plugin, and nearly every 3rd-party Tesla app, uses. Many popular apps are broken right now. Tesla has introduced a new official API but it's currently unworkable. More information [on this thread](https://github.com/nfarina/homebridge-tesla/issues/116).
+
+
 # Tesla Accessory
 
 <p align="center"><img src="https://user-images.githubusercontent.com/117280/199400037-f17f6e02-5865-433c-80b2-6b09d70018a1.PNG" width="200px"/></p>
